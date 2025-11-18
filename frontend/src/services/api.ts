@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Configure base URL - update this to your FastAPI server URL
-const BASE_URL = 'http://localhost:8000';
+// Configure base URL - automatically detects environment
+const BASE_URL = process.env.NODE_ENV === 'production' 
+  ? window.location.origin  // Use same domain in production
+  : 'http://localhost:8000'; // Use direct backend in development
 
 const api = axios.create({
   baseURL: BASE_URL,
