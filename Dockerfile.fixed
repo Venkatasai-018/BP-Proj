@@ -60,21 +60,9 @@ stdout_logfile_maxbytes=0 \
 stderr_logfile=/dev/stderr \
 stderr_logfile_maxbytes=0' > /etc/supervisor/conf.d/supervisord.conf
 
-# Create startup script that handles database initialization properly
-RUN echo '#!/bin/bash \
-set -e \
-echo "🚌 Starting College Bus Tracking System..." \
-cd /app \
-export PYTHONPATH=/app:$PYTHONPATH \
-echo "Initializing database..." \
-python -c "import os; os.chdir(\"/app\"); from database import Base, engine; Base.metadata.create_all(bind=engine); print(\"✅ Database created\")" \
-echo "Creating sample data..." \
-python seed_data.py \
-echo "✅ Setup complete!" \
-echo "🌐 Starting services..." \
-echo "Frontend: http://localhost" \
-echo "API docs: http://localhost/docs" \
-exec supervisord -c /etc/supervisor/conf.d/supervisord.conf' > /app/start.sh && chmod +x /app/start.sh
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 EXPOSE 80
 
