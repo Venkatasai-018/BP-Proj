@@ -1,18 +1,6 @@
 # Single Dockerfile for College Bus Tracking System
-# Builds and runs both frontend and backend in one container
+# Simplified version that serves a functional web frontend with the API backend
 
-FROM node:18-alpine as frontend-builder
-
-# Build React Native Web App
-WORKDIR /app/frontend
-COPY frontend/package.json ./
-RUN npm install
-
-COPY frontend/ ./
-RUN npm install -g @expo/cli
-RUN npx expo export:web
-
-# Main container with Python backend and nginx
 FROM python:3.11-slim
 
 # Install system dependencies
@@ -33,8 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copy backend code
 COPY backend/ ./
 
-# Copy built frontend
-COPY --from=frontend-builder /app/frontend/dist /var/www/html
+# Create web directory and copy frontend
+RUN mkdir -p /var/www/html
+COPY frontend/index.html /var/www/html/
 
 # Create nginx configuration that serves frontend and proxies API
 RUN echo 'server { \

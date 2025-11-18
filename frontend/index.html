@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Bus Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; color: #007AFF; margin-bottom: 30px; }
+        .card { background: #f8f9fa; padding: 20px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #007AFF; }
+        .btn { background: #007AFF; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin: 5px; }
+        .btn:hover { background: #0056b3; }
+        .api-info { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .status { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚌 College Bus Tracker</h1>
+            <p>Real-time Bus Monitoring System</p>
+            <div class="status" id="status">Checking API status...</div>
+        </div>
+        
+        <div class="card">
+            <h3>📱 Quick Actions</h3>
+            <a href="/docs" class="btn">API Documentation</a>
+            <a href="/buses" class="btn" onclick="fetchBuses()">View All Buses</a>
+            <a href="/routes" class="btn" onclick="fetchRoutes()">View Routes</a>
+            <button class="btn" onclick="fetchDashboard()">Dashboard Data</button>
+        </div>
+        
+        <div class="card">
+            <h3>📊 System Information</h3>
+            <div id="dashboard-info">
+                <p>Click "Dashboard Data" to load system statistics</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>🚍 Recent Bus Data</h3>
+            <div id="bus-data">
+                <p>Click "View All Buses" to load bus information</p>
+            </div>
+        </div>
+        
+        <div class="api-info">
+            <h4>🔗 API Endpoints</h4>
+            <p><strong>Documentation:</strong> <a href="/docs">/docs</a></p>
+            <p><strong>All Buses:</strong> <a href="/buses">/buses</a></p>
+            <p><strong>All Routes:</strong> <a href="/routes">/routes</a></p>
+            <p><strong>Dashboard:</strong> <a href="/dashboard/active-buses">/dashboard/active-buses</a></p>
+        </div>
+    </div>
+    
+    <script>
+        // Check API status on load
+        fetch("/dashboard/active-buses")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("status").innerHTML = "✅ API is running - " + data.active_buses + " active buses";
+            })
+            .catch(error => {
+                document.getElementById("status").innerHTML = "❌ API connection failed";
+                console.error("Error:", error);
+            });
+        
+        function fetchDashboard() {
+            Promise.all([
+                fetch("/dashboard/active-buses").then(r => r.json()),
+                fetch("/dashboard/routes-summary").then(r => r.json())
+            ])
+            .then(([activeBuses, routesSummary]) => {
+                document.getElementById("dashboard-info").innerHTML = `
+                    <p><strong>Active Buses:</strong> ${activeBuses.active_buses}</p>
+                    <p><strong>Total Routes:</strong> ${routesSummary.total_routes}</p>
+                    <p><strong>Total Stops:</strong> ${routesSummary.total_stops}</p>
+                `;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+        
+        function fetchBuses() {
+            fetch("/buses")
+                .then(response => response.json())
+                .then(data => {
+                    let html = "<h4>Bus List:</h4>";
+                    data.forEach(bus => {
+                        html += `<p><strong>${bus.bus_number}</strong> - Driver: ${bus.driver_name} - Status: ${bus.is_active ? "Active" : "Inactive"}</p>`;
+                    });
+                    document.getElementById("bus-data").innerHTML = html;
+                })
+                .catch(error => console.error("Error:", error));
+        }
+        
+        function fetchRoutes() {
+            fetch("/routes")
+                .then(response => response.json())
+                .then(data => {
+                    let html = "<h4>Routes:</h4>";
+                    data.forEach(route => {
+                        html += `<p><strong>${route.name}</strong>: ${route.start_point} → ${route.end_point} (${route.estimated_duration} min)</p>`;
+                    });
+                    document.getElementById("bus-data").innerHTML = html;
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+</html>
