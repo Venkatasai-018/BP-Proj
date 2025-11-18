@@ -90,8 +90,8 @@ set -e \
 echo "🚌 Starting College Bus Tracking System..." \
 echo "Initializing database..." \
 cd /app \
-python -c "from database import Base, engine; Base.metadata.create_all(bind=engine)" || true \
-python seed_data.py || true \
+python -c "import sys; sys.path.append(\"/app\"); from database import Base, engine; Base.metadata.create_all(bind=engine); print(\"Database tables created\")" || echo "Database creation failed" \
+python seed_data.py || echo "Sample data creation failed" \
 echo "✅ Database initialized" \
 echo "🌐 Starting web services..." \
 echo "📍 Application will be available at: http://localhost" \

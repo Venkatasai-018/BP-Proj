@@ -2,8 +2,11 @@ from sqlalchemy import create_engine, MetaData, Column, Integer, String, Float, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
+import os
 
-DATABASE_URL = "sqlite:///./bus_tracking.db"
+# Get the current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+DATABASE_URL = f"sqlite:///{os.path.join(current_dir, 'bus_tracking.db')}"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
