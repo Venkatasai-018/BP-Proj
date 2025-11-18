@@ -1,286 +1,365 @@
-# College Bus Tracking System
+# Real-time Bus Tracking Application
 
-A comprehensive bus tracking system designed for colleges with a FastAPI backend and React Native frontend. The system allows real-time tracking of college buses, route management, and provides a dashboard for monitoring bus operations.
+A comprehensive real-time bus tracking system with authentication, admin controls, and live GPS tracking for colleges and universities.
 
-## Features
+## 🌟 Features
 
-### Backend (FastAPI)
-- **Bus Management**: Create, read, update, and delete bus information
-- **Route Management**: Manage bus routes with multiple stops
-- **Real-time Location Tracking**: Track bus locations with timestamps
-- **Dashboard API**: Get statistics and recent updates
-- **SQLite Database**: Lightweight database for data storage
+- **Real-time GPS Tracking** - Live bus location updates with WebSocket connections
+- **User Authentication** - Secure login/signup system with JWT tokens
+- **Role-based Authorization** - Student, Staff, Driver, Admin, and Super Admin roles
+- **Admin Dashboard** - Complete user and bus management interface
+- **Permission-based Access** - Fine-grained control over who can track which buses/routes
+- **Live Bus Simulation** - Realistic GPS movement simulation for demonstration
+- **Responsive Frontend** - Mobile-friendly web interface
+- **RESTful API** - Complete API with automatic documentation
 
-### Frontend (React Native)
-- **Dashboard**: Overview of active buses, routes, and recent updates
-- **Bus List**: View all buses with their current status
-- **Real-time Tracking**: Track individual buses on a map
-- **Route Information**: View route details with stops
-- **Cross-platform**: Works on both iOS and Android
+## 🚀 Quick Start
 
-## Project Structure
+### Prerequisites
+- Docker Desktop (for containerized deployment)
+- Git
+- Web browser
 
-```
-BP-Proj/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── database.py          # Database models and setup
-│   ├── models.py           # Pydantic models
-│   ├── seed_data.py        # Sample data generator
-│   └── requirements.txt    # Python dependencies
-├── frontend/
-│   ├── App.js              # Main React Native component
-│   ├── package.json        # Node.js dependencies
-│   ├── app.json           # Expo configuration
-│   └── src/
-│       ├── navigation/
-│       │   └── AppNavigator.tsx
-│       ├── screens/
-│       │   ├── DashboardScreen.tsx
-│       │   ├── BusListScreen.tsx
-│       │   ├── BusTrackingScreen.tsx
-│       │   └── RoutesScreen.tsx
-│       ├── services/
-│       │   └── api.ts
-│       └── types/
-│           └── index.ts
-└── README.md
-```
+### Option 1: Single Docker Container (Recommended for EC2)
 
-## Quick Start
+This deployment uses a single Docker container with all services included.
 
-### Backend Setup
-
-1. **Navigate to the backend directory**:
-   ```bash
-   cd backend
-   ```
-
-2. **Create a Python virtual environment**:
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Windows
-   # or
-   source venv/bin/activate  # macOS/Linux
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Create sample data**:
-   ```bash
-   python seed_data.py
-   ```
-
-5. **Start the FastAPI server**:
-   ```bash
-   python main.py
-   ```
-
-The backend will be available at `http://localhost:8000`
-
-### Frontend Setup
-
-1. **Navigate to the frontend directory**:
-   ```bash
-   cd frontend
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Update API URL** (if needed):
-   Edit `src/services/api.ts` and update the `BASE_URL` to match your backend server:
-   ```typescript
-   const BASE_URL = 'http://localhost:8000';
-   ```
-
-4. **Start the React Native development server**:
-   ```bash
-   npm start
-   ```
-
-### Docker Deployment (Recommended)
-
-For a complete single-container deployment:
-
+**For Local Development:**
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d --build
+# Clone repository
+git clone https://github.com/Venkatasai-018/BP-Proj.git
+cd BP-Proj
 
-# Access the application
-# Frontend: http://localhost
-# API Docs: http://localhost/docs
-# Direct API: http://localhost:8000
+# Build and run (Linux/Mac)
+chmod +x docker-build.sh
+./docker-build.sh
+
+# Or on Windows
+.\docker-build.ps1
 ```
 
-### EC2 Deployment
-
-For AWS EC2 deployment, see [EC2-DEPLOYMENT.md](EC2-DEPLOYMENT.md) for detailed instructions.
-
-Quick EC2 setup:
+**For EC2 Deployment:**
 ```bash
-# On your EC2 instance
+# On your EC2 instance (Ubuntu/Amazon Linux)
+wget https://raw.githubusercontent.com/Venkatasai-018/BP-Proj/main/deploy-ec2.sh
 chmod +x deploy-ec2.sh
 ./deploy-ec2.sh
-
-# Then build and start
-docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
-## API Endpoints
+### Option 2: Manual Quick Start
+
+```bash
+# Clone and run with single container
+docker build -t bus-tracking-app .
+docker run -d --name bus-tracking-container -p 80:80 -p 8000:8000 bus-tracking-app
+```
+
+Or use the provided PowerShell script:
+```powershell
+.\docker-build.ps1
+```
+
+**Access the Application:**
+- 📱 **Live Tracking**: http://localhost/
+- 🔗 **API Docs**: http://localhost:8000/docs  
+- 👨‍💼 **Admin Panel**: http://localhost/admin
+- 🔐 **Admin Login**: `admin` / `secret`
+
+## 🌐 EC2 Deployment Guide
+
+### Prerequisites for EC2
+- AWS EC2 instance (Ubuntu 20.04+ or Amazon Linux 2)
+- Security Group allowing ports 80, 8000, and 22
+- SSH access to your EC2 instance
+
+### Automated EC2 Deployment
+
+1. **Connect to your EC2 instance:**
+```bash
+ssh -i your-key.pem ubuntu@your-ec2-ip
+```
+
+2. **Run the automated deployment script:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Venkatasai-018/BP-Proj/main/deploy-ec2.sh -o deploy-ec2.sh
+chmod +x deploy-ec2.sh
+./deploy-ec2.sh
+```
+
+3. **Access your application:**
+- Replace `your-ec2-ip` with your actual EC2 public IP
+- Live Tracking: `http://your-ec2-ip/`
+- Admin Panel: `http://your-ec2-ip/admin`
+- API Documentation: `http://your-ec2-ip:8000/docs`
+
+### Manual EC2 Setup
+
+If you prefer manual setup:
+
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+sudo apt install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+
+# Clone repository
+git clone https://github.com/Venkatasai-018/BP-Proj.git
+cd BP-Proj
+
+# Build and run
+docker build -t bus-tracking .
+docker run -d --name bus-tracking --restart unless-stopped \
+  -p 80:80 -p 8000:8000 \
+  -v bus_data:/var/lib/postgresql \
+  bus-tracking
+```
+
+### EC2 Security Configuration
+
+**Required Security Group Rules:**
+```
+Type: HTTP, Port: 80, Source: 0.0.0.0/0
+Type: Custom TCP, Port: 8000, Source: 0.0.0.0/0
+Type: SSH, Port: 22, Source: Your IP
+```
+
+**Production Security (Recommended):**
+- Set up SSL/TLS with Let's Encrypt
+- Use Application Load Balancer
+- Restrict API access to specific IPs
+- Configure CloudWatch monitoring
+
+## 💻 Manual Setup (Without Docker)
+
+### Prerequisites
+- Python 3.11 or higher
+- pip (Python package manager)
+
+### Installation
+
+1. **Setup Dependencies**
+   ```powershell
+   .\setup-manual.ps1
+   ```
+
+2. **Start the Backend**
+   ```powershell
+   .\start-backend.ps1
+   ```
+
+3. **Open Frontend**
+   - Open `frontend/live-tracker.html` in your web browser
+   - Or serve it with a simple HTTP server
+
+### Manual Commands
+
+```bash
+# Navigate to backend
+cd backend
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize database and create admin user
+python -c "
+from database import engine, Base
+Base.metadata.create_all(bind=engine)
+
+from sqlalchemy.orm import sessionmaker
+from database import User
+from auth import auth_manager
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+db = SessionLocal()
+
+admin_user = User(
+    username='admin',
+    email='admin@college.edu', 
+    full_name='System Administrator',
+    hashed_password=auth_manager.get_password_hash('admin123'),
+    role='super_admin',
+    is_active=True
+)
+db.add(admin_user)
+db.commit()
+db.close()
+print('Admin user created: admin/admin123')
+"
+
+# Start the server
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## 🔐 Default Credentials
+
+**Super Admin Account:**
+- Username: `admin`
+- Password: `admin123`
+- Role: `super_admin`
+
+*⚠️ Change default credentials in production!*
+
+## 📊 API Endpoints
+
+### Authentication
+- `POST /auth/signup` - User registration
+- `POST /auth/login` - User login
+- `GET /auth/me` - Get current user info
+
+### Admin Management
+- `GET /admin/users` - List all users
+- `PUT /admin/users/{id}` - Update user
+- `DELETE /admin/users/{id}` - Delete user
+- `GET /admin/dashboard` - Admin dashboard data
 
 ### Bus Management
-- `GET /buses` - Get all buses
-- `GET /buses/{bus_id}` - Get specific bus with tracking info
-- `POST /buses` - Create new bus
-- `PUT /buses/{bus_id}` - Update bus information
-- `DELETE /buses/{bus_id}` - Delete bus
+- `GET /buses` - Get buses (permission filtered)
+- `POST /admin/buses` - Create bus (admin)
+- `PUT /admin/buses/{id}` - Update bus (admin)
+- `DELETE /admin/buses/{id}` - Delete bus (admin)
 
 ### Route Management
-- `GET /routes` - Get all routes with stops
-- `GET /routes/{route_id}` - Get specific route
-- `POST /routes` - Create new route
-- `POST /routes/{route_id}/stops` - Add stop to route
+- `GET /routes` - Get routes (permission filtered)
+- `POST /admin/routes` - Create route (admin)
+- `PUT /admin/routes/{id}` - Update route (admin)
 
-### Location Tracking
-- `POST /buses/{bus_id}/location` - Update bus location
-- `GET /buses/{bus_id}/location` - Get current bus location
-- `GET /buses/{bus_id}/location/history` - Get location history
+### Live Tracking
+- `GET /live/buses` - Real-time bus data
+- `GET /live/bus/{id}` - Specific bus data
+- `GET /live/statistics` - System statistics
+- `WebSocket /ws` - Live tracking connection
 
-### Dashboard
-- `GET /dashboard/active-buses` - Get active buses count
-- `GET /dashboard/routes-summary` - Get routes summary
-- `GET /dashboard/recent-updates` - Get recent location updates
+### Permission Management
+- `POST /admin/permissions` - Grant user permissions
+- `GET /admin/permissions` - List permissions
+- `DELETE /admin/permissions/{id}` - Revoke permission
 
-## Database Schema
+## 🏗️ Architecture
 
-### Tables
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │────│   FastAPI        │────│   SQLite        │
+│   (HTML/JS)     │    │   Backend        │    │   Database      │
+│                 │    │                  │    │                 │
+│ - Live Tracker  │    │ - Authentication │    │ - Users         │
+│ - Admin Panel   │    │ - Bus Management │    │ - Buses         │
+│ - User Login    │    │ - Live Tracking  │    │ - Routes        │
+└─────────────────┘    │ - WebSocket API  │    │ - Permissions   │
+                       └──────────────────┘    │ - Activity Logs │
+                                              └─────────────────┘
+```
 
-1. **buses**
-   - id (Primary Key)
-   - bus_number (Unique)
-   - driver_name
-   - capacity
-   - route_id (Foreign Key)
-   - is_active
+## 🔧 Configuration
 
-2. **routes**
-   - id (Primary Key)
-   - name
-   - start_point
-   - end_point
-   - estimated_duration
+### Environment Variables
+```bash
+DATABASE_URL=sqlite:///./bus_tracking.db
+SECRET_KEY=your-secret-key-here
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+```
 
-3. **route_stops**
-   - id (Primary Key)
-   - route_id (Foreign Key)
-   - stop_name
-   - latitude
-   - longitude
-   - stop_order
-   - estimated_arrival_time
+### User Roles
+- **student** - Can track permitted buses
+- **staff** - Can track permitted buses  
+- **driver** - Can track assigned buses
+- **admin** - Can manage users and buses
+- **super_admin** - Full system access
 
-4. **bus_locations**
-   - id (Primary Key)
-   - bus_id (Foreign Key)
-   - latitude
-   - longitude
-   - timestamp
-   - speed
+## 📱 Frontend Features
 
-## Mobile App Screens
+### Live Tracker (`live-tracker.html`)
+- Real-time bus locations on interactive map
+- Bus status indicators (moving, stopped, delayed)
+- Route visualization
+- Passenger count display
+- Live statistics dashboard
 
-1. **Dashboard**: Shows statistics and recent updates
-2. **Bus List**: Lists all buses with their status
-3. **Bus Tracking**: Real-time map view of a specific bus
-4. **Routes**: Shows all available routes with stops
+### Authentication
+- User login/logout
+- Permission-based content filtering
+- Session management
 
-## Configuration
+### Admin Interface
+- User management (create, update, delete)
+- Bus fleet management
+- Route configuration
+- Permission assignment
+- Activity monitoring
 
-### Backend Configuration
-- Database: SQLite (default) - can be changed in `database.py`
-- CORS: Configured for all origins (update for production)
-- Port: 8000 (can be changed in `main.py`)
+## 🔄 Live Tracking System
 
-### Frontend Configuration
-- Expo configuration in `app.json`
-- API base URL in `src/services/api.ts`
-- Navigation structure in `src/navigation/AppNavigator.tsx`
+The application includes a sophisticated simulation system that provides:
 
-## Development
+- **Realistic GPS Movement** - Buses follow predefined routes with realistic speed variations
+- **Passenger Simulation** - Dynamic passenger count changes at stops
+- **Status Updates** - Real-time status (moving, at_stop, delayed)
+- **WebSocket Broadcasting** - Live updates to all connected clients
+- **Permission Filtering** - Users only see buses they have permission to track
+
+## 🛠️ Development
 
 ### Adding New Features
 
-1. **Backend**: Add new endpoints in `main.py`, update models if needed
-2. **Frontend**: Create new screens, update navigation, add API calls
+1. **Backend Changes**
+   - Add endpoints in `main.py`
+   - Update models in `models.py` and `database.py`
+   - Modify authentication in `auth.py`
 
-### Sample Data
-The `seed_data.py` file creates sample buses, routes, and locations for testing.
+2. **Frontend Changes**
+   - Update HTML in `frontend/` directory
+   - Modify JavaScript for new API calls
+   - Add new UI components
 
-### Real-time Updates
-The frontend automatically refreshes data:
-- Dashboard: Every 60 seconds
-- Bus tracking: Every 30 seconds
-- Pull-to-refresh on all screens
+### Database Schema
 
-## Production Deployment
+The application uses SQLite with the following main tables:
+- `users` - User accounts and authentication
+- `user_permissions` - Permission assignments  
+- `user_activity_logs` - Activity tracking
+- `buses` - Bus fleet information
+- `routes` - Route definitions
+- `route_stops` - Stop information
+- `bus_locations` - GPS tracking data
 
-### Backend
-1. Use a production WSGI server like Gunicorn
-2. Switch to a production database (PostgreSQL, MySQL)
-3. Configure proper CORS origins
-4. Add authentication and authorization
-5. Set up proper logging
-
-### Frontend
-1. Build the app using Expo build service
-2. Update API URLs for production
-3. Add proper error handling
-4. Configure app signing and publishing
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **API Connection Failed**:
-   - Check if backend server is running
-   - Verify API URL in frontend configuration
-   - Check network connectivity
+**Database Connection Error**
+```bash
+# Reinitialize database
+python -c "from database import engine, Base; Base.metadata.drop_all(engine); Base.metadata.create_all(engine)"
+```
 
-2. **Database Errors**:
-   - Ensure SQLite file permissions
-   - Check if tables are created properly
-   - Run seed_data.py to create sample data
+**Permission Denied**
+- Ensure user has appropriate role
+- Check permission assignments in admin panel
 
-3. **Map Not Loading**:
-   - Check if location permissions are granted
-   - Verify React Native Maps setup
-   - Ensure valid coordinates in sample data
+**WebSocket Connection Failed**  
+- Verify port 8000 is accessible
+- Check firewall settings
 
-### Development Tips
+**Docker Build Failed**
+- Ensure Docker Desktop is running
+- Check available disk space
+- Try: `docker system prune -f`
 
-1. Use Expo DevTools for debugging
-2. Check FastAPI docs at `http://localhost:8000/docs`
-3. Use React Native Debugger for frontend debugging
-4. Check console logs for API errors
+## 📞 Support
 
-## License
+For issues or questions:
+1. Check the API documentation at `/docs`
+2. Review the application logs
+3. Verify user permissions and roles
+4. Check database connectivity
 
-This project is open source and available under the MIT License.
+## 📄 License
 
-## Contributing
+This project is created for educational purposes and college bus tracking systems.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+---
 
-## Support
-
-For questions or issues, please check the troubleshooting section or create an issue in the project repository.
+**🚀 Ready to track your buses in real-time!**

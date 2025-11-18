@@ -1,222 +1,109 @@
 #!/bin/bash
-
-# EC2 Deployment Script for College Bus Tracking System
-# Run this script on your EC2 instance to deploy the application
+# EC2 Deployment Script for Bus Tracking System
 
 set -e
 
-echo "🚌 College Bus Tracking System - EC2 Deployment Script"
-echo "======================================================"
+echo "🚀 Starting EC2 deployment for Bus Tracking System..."
 
-# Update system packages
+# Update system
 echo "📦 Updating system packages..."
-sudo apt update && sudo apt upgrade -y
+sudo apt-get update
+sudo apt-get upgrade -y
 
-# Install Docker if not already installed
+# Install Docker if not present
 if ! command -v docker &> /dev/null; then
     echo "🐳 Installing Docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+    
+    # Install Docker
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    
+    # Add user to docker group
     sudo usermod -aG docker $USER
-    rm get-docker.sh
+    
+    echo "✅ Docker installed successfully"
 fi
 
-# Install Docker Compose if not already installed
-if ! command -v docker-compose &> /dev/null; then
-    echo "🔧 Installing Docker Compose..."
-    sudo curl -L "https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-fi
-
-# Create application directory
-APP_DIR="/home/ubuntu/bus-tracker"
-echo "📁 Setting up application directory: $APP_DIR"
-mkdir -p $APP_DIR
-cd $APP_DIR
-
-# Clone or update the repository (if using git)
-if [ -d ".git" ]; then
-    echo "🔄 Updating existing repository..."
+# Clone or update repository
+REPO_DIR="/home/$(whoami)/bus-tracking"
+if [ -d "$REPO_DIR" ]; then
+    echo "📁 Updating existing repository..."
+    cd "$REPO_DIR"
     git pull
 else
-    echo "📥 Note: Please copy your project files to $APP_DIR"
-    echo "   You can use scp, rsync, or git clone to get your files here"
+    echo "📥 Cloning repository..."
+    git clone https://github.com/Venkatasai-018/BP-Proj.git "$REPO_DIR"
+    cd "$REPO_DIR"
 fi
 
-# Set proper permissions
-echo "🔐 Setting permissions..."
-sudo chown -R $USER:$USER $APP_DIR
+# Stop existing containers if running
+echo "🛑 Stopping existing containers..."
+docker stop bus-tracking 2>/dev/null || true
+docker rm bus-tracking 2>/dev/null || true
 
-# Create environment file
-echo "⚙️  Creating environment configuration..."
-cat > .env << EOF
-# Environment Configuration for EC2
-ENV=production
-DATABASE_URL=sqlite:///./bus_tracking.db
-API_HOST=0.0.0.0
-API_PORT=8000
-DEBUG=false
+# Build the Docker image
+echo "🏗️  Building Docker image..."
+docker build -t bus-tracking:latest .
 
-# EC2 Instance Configuration
-INSTANCE_TYPE=t2.micro
-AWS_REGION=us-east-1
-EOF
+# Run the container
+echo "🚀 Starting Bus Tracking System..."
+docker run -d \
+    --name bus-tracking \
+    --restart unless-stopped \
+    -p 80:80 \
+    -p 8000:8000 \
+    -v bus_data:/var/lib/postgresql \
+    -e SECRET_KEY="$(openssl rand -hex 32)" \
+    -e ACCESS_TOKEN_EXPIRE_MINUTES="60" \
+    bus-tracking:latest
 
-# Create production docker-compose file
-echo "📝 Creating production docker-compose.yml..."
-cat > docker-compose.prod.yml << EOF
-version: '3.8'
+# Wait for container to start
+echo "⏳ Waiting for services to start..."
+sleep 30
 
-services:
-  bus-tracker:
-    build: .
-    ports:
-      - "80:80"
-      - "8000:8000"
-    volumes:
-      - bus_data:/app/backend
-      - ./logs:/var/log
-    environment:
-      - ENV=production
-      - DATABASE_URL=sqlite:///./bus_tracking.db
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/docs"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-
-volumes:
-  bus_data:
-    driver: local
-EOF
-
-# Create systemd service for auto-start
-echo "🚀 Creating systemd service..."
-sudo tee /etc/systemd/system/bus-tracker.service > /dev/null << EOF
-[Unit]
-Description=College Bus Tracker
-Requires=docker.service
-After=docker.service
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-WorkingDirectory=$APP_DIR
-ExecStart=/usr/local/bin/docker-compose -f docker-compose.prod.yml up -d
-ExecStop=/usr/local/bin/docker-compose -f docker-compose.prod.yml down
-TimeoutStartSec=0
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Enable and start the service
-echo "🔧 Enabling systemd service..."
-sudo systemctl daemon-reload
-sudo systemctl enable bus-tracker.service
-
-# Configure firewall (if UFW is installed)
-if command -v ufw &> /dev/null; then
-    echo "🔒 Configuring firewall..."
-    sudo ufw allow 22/tcp      # SSH
-    sudo ufw allow 80/tcp      # HTTP
-    sudo ufw allow 8000/tcp    # API
-    sudo ufw --force enable
+# Check if services are running
+echo "🔍 Checking service health..."
+if curl -f http://localhost/docs > /dev/null 2>&1; then
+    echo "✅ Backend API is running"
+else
+    echo "❌ Backend API is not responding"
 fi
 
-# Create backup script
-echo "💾 Creating backup script..."
-cat > backup.sh << 'EOF'
-#!/bin/bash
-# Backup script for bus tracking database
-BACKUP_DIR="/home/ubuntu/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-mkdir -p $BACKUP_DIR
+if curl -f http://localhost/ > /dev/null 2>&1; then
+    echo "✅ Frontend is accessible"
+else
+    echo "❌ Frontend is not accessible"
+fi
 
-# Stop services temporarily
-docker-compose -f docker-compose.prod.yml stop
-
-# Backup database
-cp /var/lib/docker/volumes/bus-tracker_bus_data/_data/bus_tracking.db \
-   $BACKUP_DIR/bus_tracking_$DATE.db
-
-# Restart services
-docker-compose -f docker-compose.prod.yml start
-
-echo "Backup created: $BACKUP_DIR/bus_tracking_$DATE.db"
-EOF
-chmod +x backup.sh
-
-# Create monitoring script
-echo "📊 Creating monitoring script..."
-cat > monitor.sh << 'EOF'
-#!/bin/bash
-# Simple monitoring script
-echo "=== College Bus Tracker Status ==="
-echo "Date: $(date)"
-echo ""
-
-echo "🐳 Docker Status:"
-docker-compose -f docker-compose.prod.yml ps
-echo ""
-
-echo "💾 Disk Usage:"
-df -h / | tail -1
-echo ""
-
-echo "🔍 Memory Usage:"
-free -h
-echo ""
-
-echo "🌐 Service Health:"
-curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" http://localhost/docs || echo "Service appears to be down"
-echo ""
-
-echo "📈 Container Stats:"
-docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"
-EOF
-chmod +x monitor.sh
-
-# Create logs directory
-mkdir -p logs
+# Get public IP
+PUBLIC_IP=$(curl -s http://checkip.amazonaws.com/ || echo "Unable to get public IP")
 
 echo ""
-echo "✅ EC2 Deployment Setup Complete!"
+echo "🎉 Deployment completed!"
+echo "📍 Access your application at:"
+echo "   - Live Tracking: http://$PUBLIC_IP/"
+echo "   - Admin Panel: http://$PUBLIC_IP/admin"
+echo "   - API Docs: http://$PUBLIC_IP:8000/docs"
 echo ""
-echo "📋 Next Steps:"
-echo "1. Copy your project files to: $APP_DIR"
-echo "2. Build and start the application:"
-echo "   cd $APP_DIR"
-echo "   docker-compose -f docker-compose.prod.yml up -d --build"
+echo "🔑 Default login credentials:"
+echo "   Username: admin"
+echo "   Password: secret"
+echo "   Email: admin@college.edu"
 echo ""
-echo "3. Check application status:"
-echo "   ./monitor.sh"
+echo "🔧 Management commands:"
+echo "   - View logs: docker logs bus-tracking"
+echo "   - Restart: docker restart bus-tracking"
+echo "   - Stop: docker stop bus-tracking"
 echo ""
-echo "🌐 Once running, your app will be available at:"
-echo "   Frontend: http://$(curl -s ifconfig.me)"
-echo "   API Docs: http://$(curl -s ifconfig.me)/docs"
-echo "   Direct API: http://$(curl -s ifconfig.me):8000"
+echo "⚠️  Security reminder:"
+echo "   - Change default admin password immediately"
+echo "   - Configure SSL/HTTPS for production"
+echo "   - Set up regular backups"
 echo ""
-echo "🛠  Useful Commands:"
-echo "   Start:   sudo systemctl start bus-tracker"
-echo "   Stop:    sudo systemctl stop bus-tracker"
-echo "   Restart: sudo systemctl restart bus-tracker"
-echo "   Logs:    docker-compose -f docker-compose.prod.yml logs -f"
-echo "   Monitor: ./monitor.sh"
-echo "   Backup:  ./backup.sh"
-echo ""
-echo "⚠️  Security Notes:"
-echo "   - Consider setting up SSL/TLS with Let's Encrypt"
-echo "   - Configure proper security groups in AWS"
-echo "   - Regular backups are scheduled via cron"
-echo "   - Monitor logs for any issues"
-echo ""
-EOF
+
+# Show container status
+echo "📊 Container status:"
+docker ps | grep bus-tracking
