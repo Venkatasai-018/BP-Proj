@@ -50,6 +50,7 @@ async def student_login(credentials: StudentLoginRequest, db: Session = Depends(
             "email": student.email,
             "name": student.name,
             "roll_number": student.roll_number,
+            "phone": student.phone,
             "route_id": student.route_id
         }
     )

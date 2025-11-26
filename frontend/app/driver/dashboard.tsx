@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,8 +17,20 @@ import { driverService } from '../../services/api';
 export default function DriverDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [locationSharing, setLocationSharing] = useState(false);
+
+  const loadUserData = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('userData');
+      if (storedData) {
+        setUserData(JSON.parse(storedData));
+      }
+    } catch (error) {
+      console.error('Failed to load user data:', error);
+    }
+  };
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -42,7 +55,13 @@ export default function DriverDashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    await AsyncStorage.clear();
+    router.replace('/');
+  };
+
   useEffect(() => {
+    loadUserData();
     loadDashboard();
   }, []);
 
@@ -52,9 +71,12 @@ export default function DriverDashboard() {
         <View style={styles.headerContent}>
           <View>
             <Text style={styles.greeting}>Welcome Driver!</Text>
-            <Text style={styles.userName}>Driver Dashboard</Text>
+            <Text style={styles.userName}>{userData?.name || 'Driver'}</Text>
+            {userData?.license_number && (
+              <Text style={styles.userSubtitle}>License: {userData.license_number}</Text>
+            )}
           </View>
-          <TouchableOpacity onPress={() => router.back()} style={styles.logoutButton}>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
             <MaterialCommunityIcons name="logout" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -64,6 +86,38 @@ export default function DriverDashboard() {
         style={styles.content}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={loadDashboard} />}
       >
+        {/* Statistics Cards */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
+              <MaterialCommunityIcons name="bus" size={28} color="#3b82f6" />
+            </View>
+            <Text style={styles.statValue}>{dashboardData?.bus_number || 'N/A'}</Text>
+            <Text style={styles.statLabel}>My Bus</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#ddd6fe' }]}>
+              <MaterialCommunityIcons name="routes" size={28} color="#8b5cf6" />
+            </View>
+            <Text style={styles.statValue}>{dashboardData?.route_name || 'N/A'}</Text>
+            <Text style={styles.statLabel}>Route</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#fef3c7' }]}>
+              <MaterialCommunityIcons name="account-group" size={28} color="#f59e0b" />
+            </View>
+            <Text style={styles.statValue}>{dashboardData?.capacity || '0'}</Text>
+            <Text style={styles.statLabel}>Capacity</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#d1fae5' }]}>
+              <MaterialCommunityIcons name="check-circle" size={28} color="#10b981" />
+            </View>
+            <Text style={styles.statValue}>{locationSharing ? 'ON' : 'OFF'}</Text>
+            <Text style={styles.statLabel}>Tracking</Text>
+          </View>
+        </View>
+
         {/* Location Sharing */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -141,32 +195,35 @@ export default function DriverDashboard() {
               <MaterialCommunityIcons name="calendar" size={32} color="#10b981" />
               <Text style={styles.actionText}>Schedule</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <MaterialCommunityIcons name="wrench" size={32} color="#ef4444" />
-              <Text style={styles.actionText}>Maintenance</Text>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => router.push('/driver/feedback')}
+            >
+              <MaterialCommunityIcons name="message-text" size={32} color="#ef4444" />
+              <Text style={styles.actionText}>Feedback</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Driver Info */}
-        {dashboardData && (
+        {userData && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>My Information</Text>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Name:</Text>
-              <Text style={styles.infoValue}>{dashboardData.name || 'N/A'}</Text>
+              <Text style={styles.infoValue}>{userData.name || 'N/A'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>License:</Text>
-              <Text style={styles.infoValue}>{dashboardData.license_number || 'N/A'}</Text>
+              <Text style={styles.infoValue}>{userData.license_number || 'N/A'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Email:</Text>
-              <Text style={styles.infoValue}>{dashboardData.email || 'N/A'}</Text>
+              <Text style={styles.infoValue}>{userData.email || 'N/A'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Phone:</Text>
-              <Text style={styles.infoValue}>{dashboardData.phone || 'N/A'}</Text>
+              <Text style={styles.infoValue}>{userData.phone || 'N/A'}</Text>
             </View>
           </View>
         )}
@@ -198,6 +255,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    marginTop: 4,
+  },
+  userSubtitle: {
+    fontSize: 14,
+    color: '#fef3c7',
     marginTop: 4,
   },
   logoutButton: {
@@ -298,5 +360,43 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginTop: 8,
     fontWeight: '600',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  statCard: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  statIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
   },
 });

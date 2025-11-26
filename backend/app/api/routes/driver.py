@@ -54,6 +54,7 @@ async def driver_login(credentials: DriverLoginRequest, db: Session = Depends(ge
             "email": driver.email,
             "name": driver.name,
             "license_number": driver.license_number,
+            "phone": driver.phone,
             "bus_assigned": bus_number
         }
     )

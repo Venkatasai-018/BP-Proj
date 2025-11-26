@@ -1,6 +1,16 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+// Use localhost for web, and your computer's IP for mobile
+const getApiUrl = () => {
+  if (Platform.OS === 'web') {
+    return 'http://127.0.0.1:8000/api/v1';
+  }
+  // For mobile devices, use your computer's IP address
+  return 'http://192.168.1.17:8000/api/v1';
+};
+
+const API_BASE_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,6 +19,30 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log('API Request:', config.method?.toUpperCase(), config.url);
+    return config;
+  },
+  (error) => {
+    console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('Response Error:', error.response?.status, error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 export const authService = {
   adminLogin: async (username: string, password: string) => {
@@ -119,6 +153,11 @@ export const routeService = {
     return response.data;
   },
   
+  updateRoute: async (id: number, data: any) => {
+    const response = await api.put(`/routes/${id}`, data);
+    return response.data;
+  },
+  
   deleteRoute: async (id: number) => {
     const response = await api.delete(`/routes/${id}`);
     return response.data;
@@ -138,6 +177,11 @@ export const scheduleService = {
   
   createSchedule: async (data: any) => {
     const response = await api.post('/schedules', data);
+    return response.data;
+  },
+  
+  updateSchedule: async (id: number, data: any) => {
+    const response = await api.put(`/schedules/${id}`, data);
     return response.data;
   },
   

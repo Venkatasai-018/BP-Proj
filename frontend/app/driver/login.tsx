@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { authService } from '../../services/api';
@@ -29,6 +30,10 @@ export default function DriverLogin() {
     setLoading(true);
     try {
       const response = await authService.driverLogin(email, password);
+      // Store user data
+      await AsyncStorage.setItem('userToken', response.access_token);
+      await AsyncStorage.setItem('userType', 'driver');
+      await AsyncStorage.setItem('userData', JSON.stringify(response.driver));
       Alert.alert('Success', 'Login successful!');
       router.push('/driver/dashboard');
     } catch (error: any) {
