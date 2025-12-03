@@ -102,6 +102,16 @@ class StudentResponse(BaseModel):
     status: str
 
 
+class StudentUpdate(BaseModel):
+    """Schema for updating a student."""
+    name: str
+    email: str
+    roll_number: str
+    phone: str
+    route_id: int | None = None
+    password: str | None = None
+
+
 @router.post("/students", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
 async def create_student(student: StudentCreate, db: Session = Depends(get_db)) -> StudentResponse:
     """Admin creates a new student account."""
@@ -149,7 +159,7 @@ async def list_students(db: Session = Depends(get_db)) -> list[StudentResponse]:
 
 
 @router.put("/students/{student_id}", response_model=StudentResponse)
-async def update_student(student_id: int, student: StudentCreate, db: Session = Depends(get_db)) -> StudentResponse:
+async def update_student(student_id: int, student: StudentUpdate, db: Session = Depends(get_db)) -> StudentResponse:
     """Admin updates student information."""
     # Check if student exists
     existing = crud.get_student_by_id(db, student_id)
@@ -171,7 +181,7 @@ async def update_student(student_id: int, student: StudentCreate, db: Session = 
         roll_number=student.roll_number,
         phone=student.phone,
         route_id=student.route_id,
-        password=student.password if student.password else None
+        password=student.password
     )
     
     if not updated_student:
@@ -215,6 +225,16 @@ class DriverResponse(BaseModel):
     license_number: str
     bus_id: int | None
     status: str
+
+
+class DriverUpdate(BaseModel):
+    """Schema for updating a driver."""
+    name: str
+    email: str
+    phone: str
+    license_number: str
+    bus_id: int | None = None
+    password: str | None = None
 
 
 @router.post("/drivers", response_model=DriverResponse, status_code=status.HTTP_201_CREATED)
@@ -264,7 +284,7 @@ async def list_drivers(db: Session = Depends(get_db)) -> list[DriverResponse]:
 
 
 @router.put("/drivers/{driver_id}", response_model=DriverResponse)
-async def update_driver(driver_id: int, driver: DriverCreate, db: Session = Depends(get_db)) -> DriverResponse:
+async def update_driver(driver_id: int, driver: DriverUpdate, db: Session = Depends(get_db)) -> DriverResponse:
     """Admin updates driver information."""
     # Check if driver exists
     existing = crud.get_driver_by_id(db, driver_id)
@@ -286,7 +306,7 @@ async def update_driver(driver_id: int, driver: DriverCreate, db: Session = Depe
         phone=driver.phone,
         license_number=driver.license_number,
         bus_id=driver.bus_id,
-        password=driver.password if driver.password else None
+        password=driver.password
     )
     
     if not updated_driver:
