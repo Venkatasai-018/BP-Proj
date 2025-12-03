@@ -24,6 +24,13 @@ class RouteCreate(BaseModel):
     stops: list[RouteStop]
 
 
+class RouteUpdate(BaseModel):
+    """Schema for updating a route."""
+    route_name: str | None = None
+    description: str | None = None
+    stops: list[RouteStop] | None = None
+
+
 class RouteResponse(BaseModel):
     """Schema for route response."""
     id: int
@@ -125,36 +132,43 @@ async def update_route(route_id: int, route: RouteCreate, db: Session = Depends(
     if not db_route:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Route not found")
     
-    # Update route details
-    db_route.route_name = route.route_name
-    db_route.description = route.description
+    # Update route details using crud function
+    updated_route = crud.update_route(
+        db=db,
+        route_id=route_id,
+        route_name=route.route_name,
+        description=route.description
+    )
+    
+    if not updated_route:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Route not found")
     
     # Delete existing stops
-    for stop in db_route.stops:
+    for stop in updated_route.stops:
         db.delete(stop)
     
     # Create new stops
     for stop in route.stops:
         crud.create_route_stop(
             db,
-            route_id=db_route.id,
-            stop_name=stop.stop_name,
-            latitude=stop.latitude,
-            longitude=stop.longitude,
-            order=stop.order
-        )
-    
     db.commit()
-    db.refresh(db_route)
+    db.refresh(updated_route)
     
     return RouteResponse(
-        id=db_route.id,
-        route_name=db_route.route_name,
-        description=db_route.description or "",
+        id=updated_route.id,
+        route_name=updated_route.route_name,
+        description=updated_route.description or "",
         stops=[
             RouteStop(
                 stop_name=stop.stop_name,
                 latitude=stop.latitude,
+                longitude=stop.longitude,
+                order=stop.order
+            )
+            for stop in updated_route.stops
+        ],
+        status=updated_route.status
+    )           latitude=stop.latitude,
                 longitude=stop.longitude,
                 order=stop.order
             )
