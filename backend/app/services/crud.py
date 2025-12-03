@@ -203,6 +203,12 @@ def delete_bus(db: Session, bus_id: int) -> bool:
     """Delete a bus."""
     bus = db.query(Bus).filter(Bus.id == bus_id).first()
     if bus:
+        db.delete(bus)
+        db.commit()
+        return True
+    return False
+
+
 def create_route(db: Session, route_name: str, description: str) -> Route:
     """Create a new route."""
     route = Route(route_name=route_name, description=description)

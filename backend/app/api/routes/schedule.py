@@ -58,6 +58,9 @@ async def get_schedule(schedule_id: int, db: Session = Depends(get_db)) -> Sched
         departure_time=schedule.departure_time,
         days_of_week=schedule.days_of_week.split(",") if schedule.days_of_week else [],
         status="active"
+    )
+
+
 @router.post("/", response_model=ScheduleResponse, status_code=status.HTTP_201_CREATED)
 async def create_schedule(schedule: ScheduleCreate, db: Session = Depends(get_db)) -> ScheduleResponse:
     """Create a new bus schedule."""
@@ -75,6 +78,21 @@ async def create_schedule(schedule: ScheduleCreate, db: Session = Depends(get_db
     new_schedule = crud.create_schedule(
         db=db,
         bus_id=schedule.bus_id,
+        route_id=schedule.route_id,
+        departure_time=schedule.departure_time,
+        days_of_week=days_str
+    )
+    
+    return ScheduleResponse(
+        id=new_schedule.id,
+        bus_number=bus.bus_number,
+        route_name=route.route_name,
+        departure_time=new_schedule.departure_time,
+        days_of_week=schedule.days_of_week,
+        status="active"
+    )
+
+
 @router.put("/{schedule_id}", response_model=ScheduleResponse)
 async def update_schedule(schedule_id: int, schedule: ScheduleCreate, db: Session = Depends(get_db)) -> ScheduleResponse:
     """Update a schedule."""
@@ -122,21 +140,3 @@ async def delete_schedule(schedule_id: int, db: Session = Depends(get_db)) -> No
     success = crud.delete_schedule(db, schedule_id)
     if not success:
         raise HTTPException(status_code=404, detail="Schedule not found")
-    return ScheduleResponse(
-        id=new_schedule.id,
-        bus_number=bus.bus_number,
-        route_name=route.route_name,
-        departure_time=new_schedule.departure_time,
-        days_of_week=schedule.days_of_week,
-        status="active"
-    )   departure_time=schedule.departure_time,
-        days_of_week=schedule.days_of_week,
-        status="active"
-    )
-
-
-@router.delete("/{schedule_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_schedule(schedule_id: int) -> None:
-    """Delete a schedule."""
-    # TODO: Delete from database
-    pass
