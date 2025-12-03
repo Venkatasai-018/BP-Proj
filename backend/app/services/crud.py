@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from app.models.models import Admin, Student, Driver, Bus, Route, RouteStop, Schedule, Feedback
+from app.models.models import Admin, Student, Driver, Bus, Route, RouteStop, Schedule, Feedback, Location
 from app.core.security import get_password_hash
 
 
@@ -83,6 +83,11 @@ def delete_student(db: Session, student_id: int) -> bool:
     """Delete a student."""
     student = db.query(Student).filter(Student.id == student_id).first()
     if student:
+        # Delete related feedback from this student
+        db.query(Feedback).filter(
+            (Feedback.user_id == student_id) & (Feedback.user_type == "student")
+        ).delete()
+        # Delete the student
         db.delete(student)
         db.commit()
         return True
@@ -150,6 +155,13 @@ def delete_driver(db: Session, driver_id: int) -> bool:
     """Delete a driver."""
     driver = db.query(Driver).filter(Driver.id == driver_id).first()
     if driver:
+        # Delete related feedback from this driver
+        db.query(Feedback).filter(
+            (Feedback.user_id == driver_id) & (Feedback.user_type == "driver")
+        ).delete()
+        # Delete related location tracking data
+        db.query(Location).filter(Location.driver_id == driver_id).delete()
+        # Delete the driver
         db.delete(driver)
         db.commit()
         return True
@@ -203,6 +215,11 @@ def delete_bus(db: Session, bus_id: int) -> bool:
     """Delete a bus."""
     bus = db.query(Bus).filter(Bus.id == bus_id).first()
     if bus:
+        # Delete related schedules first
+        db.query(Schedule).filter(Schedule.bus_id == bus_id).delete()
+        # Set driver's bus_id to None
+        db.query(Driver).filter(Driver.bus_id == bus_id).update({"bus_id": None})
+        # Delete the bus
         db.delete(bus)
         db.commit()
         return True
@@ -236,6 +253,13 @@ def delete_route(db: Session, route_id: int) -> bool:
     """Delete a route."""
     route = db.query(Route).filter(Route.id == route_id).first()
     if route:
+        # Delete related schedules
+        db.query(Schedule).filter(Schedule.route_id == route_id).delete()
+        # Set students' route_id to None
+        db.query(Student).filter(Student.route_id == route_id).update({"route_id": None})
+        # Delete route stops (these should cascade automatically, but being explicit)
+        db.query(RouteStop).filter(RouteStop.route_id == route_id).delete()
+        # Delete the route
         db.delete(route)
         db.commit()
         return True
@@ -302,7 +326,6 @@ def delete_schedule(db: Session, schedule_id: int) -> bool:
         db.commit()
         return True
     return False
-    db.commit()
     db.refresh(stop)
     return stop
 
