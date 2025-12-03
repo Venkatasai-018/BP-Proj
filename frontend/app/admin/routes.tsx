@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   Modal,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -86,20 +87,42 @@ export default function RouteManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    Alert.alert('Confirm Delete', 'Are you sure you want to delete this route?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await routeService.deleteRoute(id);
-            Alert.alert('Success', 'Route deleted successfully');
-            loadRoutes();
-          } catch (error: any) {
-            console.error('Delete error:', error);
-            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete route';
-            Alert.alert('Error', errorMsg);
+    console.log('Delete clicked for route ID:', id);
+    
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to delete this route?');
+      if (!confirmed) {
+        console.log('Delete cancelled');
+        return;
+      }
+      
+      console.log('Delete confirmed, calling API...');
+      try {
+        await routeService.deleteRoute(id);
+        console.log('Delete successful');
+        alert('Route deleted successfully');
+        loadRoutes();
+      } catch (error: any) {
+        console.error('Delete error:', error);
+        console.error('Error response:', error.response);
+        const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete route';
+        alert(`Error: ${errorMsg}`);
+      }
+    } else {
+      Alert.alert('Confirm Delete', 'Are you sure you want to delete this route?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await routeService.deleteRoute(id);
+              Alert.alert('Success', 'Route deleted successfully');
+              loadRoutes();
+            } catch (error: any) {
+              console.error('Delete error:', error);
+              const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete route';
+              Alert.alert('Error', errorMsg);
           }
         },
       },

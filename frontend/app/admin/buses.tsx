@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   Modal,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -89,24 +90,47 @@ export default function BusManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    Alert.alert('Confirm Delete', 'Are you sure you want to delete this bus?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await busService.deleteBus(id);
-            Alert.alert('Success', 'Bus deleted successfully');
-            loadBuses();
-          } catch (error: any) {
-            console.error('Delete error:', error);
-            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete bus';
-            Alert.alert('Error', errorMsg);
-          }
+    console.log('Delete clicked for bus ID:', id);
+    
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to delete this bus?');
+      if (!confirmed) {
+        console.log('Delete cancelled');
+        return;
+      }
+      
+      console.log('Delete confirmed, calling API...');
+      try {
+        await busService.deleteBus(id);
+        console.log('Delete successful');
+        alert('Bus deleted successfully');
+        loadBuses();
+      } catch (error: any) {
+        console.error('Delete error:', error);
+        console.error('Error response:', error.response);
+        const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete bus';
+        alert(`Error: ${errorMsg}`);
+      }
+    } else {
+      Alert.alert('Confirm Delete', 'Are you sure you want to delete this bus?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await busService.deleteBus(id);
+              Alert.alert('Success', 'Bus deleted successfully');
+              loadBuses();
+            } catch (error: any) {
+              console.error('Delete error:', error);
+              const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete bus';
+              Alert.alert('Error', errorMsg);
+            }
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   return (

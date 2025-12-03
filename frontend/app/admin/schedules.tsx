@@ -8,10 +8,11 @@ import {
   TextInput,
   Alert,
   Modal,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { scheduleService } from '../../services/api';
+import { scheduleService, busService, routeService } from '../../services/api';
 
 export default function ScheduleManagement() {
   const router = useRouter();
@@ -87,24 +88,47 @@ export default function ScheduleManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    Alert.alert('Confirm Delete', 'Are you sure you want to delete this schedule?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await scheduleService.deleteSchedule(id);
-            Alert.alert('Success', 'Schedule deleted successfully');
-            loadSchedules();
-          } catch (error: any) {
-            console.error('Delete error:', error);
-            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete schedule';
-            Alert.alert('Error', errorMsg);
-          }
+    console.log('Delete clicked for schedule ID:', id);
+    
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to delete this schedule?');
+      if (!confirmed) {
+        console.log('Delete cancelled');
+        return;
+      }
+      
+      console.log('Delete confirmed, calling API...');
+      try {
+        await scheduleService.deleteSchedule(id);
+        console.log('Delete successful');
+        alert('Schedule deleted successfully');
+        loadSchedules();
+      } catch (error: any) {
+        console.error('Delete error:', error);
+        console.error('Error response:', error.response);
+        const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete schedule';
+        alert(`Error: ${errorMsg}`);
+      }
+    } else {
+      Alert.alert('Confirm Delete', 'Are you sure you want to delete this schedule?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await scheduleService.deleteSchedule(id);
+              Alert.alert('Success', 'Schedule deleted successfully');
+              loadSchedules();
+            } catch (error: any) {
+              console.error('Delete error:', error);
+              const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete schedule';
+              Alert.alert('Error', errorMsg);
+            }
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   return (
