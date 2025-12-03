@@ -84,8 +84,7 @@ export const adminService = {
   },
   
   deleteStudent: async (id: number) => {
-    const response = await api.delete(`/admin/students/${id}`);
-    return response.data;
+    await api.delete(`/admin/students/${id}`);
   },
   
   // Driver Management
@@ -105,8 +104,7 @@ export const adminService = {
   },
   
   deleteDriver: async (id: number) => {
-    const response = await api.delete(`/admin/drivers/${id}`);
-    return response.data;
+    await api.delete(`/admin/drivers/${id}`);
   },
 };
 
@@ -132,8 +130,7 @@ export const busService = {
   },
   
   deleteBus: async (id: number) => {
-    const response = await api.delete(`/buses/${id}`);
-    return response.data;
+    await api.delete(`/buses/${id}`);
   },
 };
 
@@ -159,8 +156,7 @@ export const routeService = {
   },
   
   deleteRoute: async (id: number) => {
-    const response = await api.delete(`/routes/${id}`);
-    return response.data;
+    await api.delete(`/routes/${id}`);
   },
 };
 
@@ -186,8 +182,7 @@ export const scheduleService = {
   },
   
   deleteSchedule: async (id: number) => {
-    const response = await api.delete(`/schedules/${id}`);
-    return response.data;
+    await api.delete(`/schedules/${id}`);
   },
 };
 
