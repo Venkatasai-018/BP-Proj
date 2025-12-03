@@ -179,6 +179,16 @@ def get_bus(db: Session, bus_id: int) -> Optional[Bus]:
     return db.query(Bus).filter(Bus.id == bus_id).first()
 
 
+def get_bus_by_number(db: Session, bus_number: str) -> Optional[Bus]:
+    """Get bus by bus number."""
+    return db.query(Bus).filter(Bus.bus_number == bus_number).first()
+
+
+def get_bus_by_registration(db: Session, registration_number: str) -> Optional[Bus]:
+    """Get bus by registration number."""
+    return db.query(Bus).filter(Bus.registration_number == registration_number).first()
+
+
 def create_bus(db: Session, bus_number: str, capacity: int, 
                model: str, registration_number: str) -> Bus:
     """Create a new bus."""

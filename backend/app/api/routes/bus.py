@@ -29,9 +29,10 @@ class BusResponse(BaseModel):
 
 class BusUpdate(BaseModel):
     """Schema for updating bus information."""
-    capacity: int | None = None
-    model: str | None = None
-    status: str | None = None
+    bus_number: str
+    capacity: int
+    model: str
+    registration_number: str
 
 
 @router.get("/", response_model=list[BusResponse])
@@ -88,12 +89,24 @@ async def create_bus(bus: BusCreate, db: Session = Depends(get_db)) -> BusRespon
 
 
 @router.put("/{bus_id}", response_model=BusResponse)
-async def update_bus(bus_id: int, bus: BusCreate, db: Session = Depends(get_db)) -> BusResponse:
+async def update_bus(bus_id: int, bus: BusUpdate, db: Session = Depends(get_db)) -> BusResponse:
     """Update bus information."""
     # Check if bus exists
     existing = crud.get_bus(db, bus_id)
     if not existing:
         raise HTTPException(status_code=404, detail="Bus not found")
+    
+    # Check if bus_number is being changed and already exists
+    if bus.bus_number != existing.bus_number:
+        bus_exists = crud.get_bus_by_number(db, bus.bus_number)
+        if bus_exists and bus_exists.id != bus_id:
+            raise HTTPException(status_code=400, detail="Bus number already exists")
+    
+    # Check if registration_number is being changed and already exists
+    if bus.registration_number != existing.registration_number:
+        reg_exists = crud.get_bus_by_registration(db, bus.registration_number)
+        if reg_exists and reg_exists.id != bus_id:
+            raise HTTPException(status_code=400, detail="Registration number already exists")
     
     # Update bus
     updated_bus = crud.update_bus(
