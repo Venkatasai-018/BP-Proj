@@ -1,0 +1,1600 @@
+CHAPTER 5: IMPLEMENTATION
+
+================================================================================
+
+5.1 INTRODUCTION
+
+This chapter provides a comprehensive overview of the implementation phase of the TCE EduRide Bus Tracking System. It details the methodologies employed during development, programming languages and frameworks utilized, algorithms designed for core functionalities, pseudocode representations of critical components, and an exhaustive list of packages and libraries integrated into the system.
+
+The implementation phase translates the system design and requirements specified in previous chapters into a working software application. This chapter serves as a technical reference for developers, providing insights into the coding practices, architectural decisions, and implementation strategies that bring the TCE EduRide platform to life.
+
+The chapter is organized into distinct sections covering development methodologies, programming languages, algorithms, pseudocode, and detailed package documentation for both frontend and backend components. Each section provides in-depth technical information essential for understanding, maintaining, and extending the system.
+
+================================================================================
+
+5.2 DEVELOPMENT METHODOLOGIES
+
+5.2.1 Agile Development Methodology
+
+The TCE EduRide project follows the Agile software development methodology, specifically implementing the Scrum framework. This iterative and incremental approach enables flexibility, continuous improvement, and rapid response to changing requirements.
+
+**Sprint-Based Development:**
+The development process is organized into two-week sprints, each delivering a potentially shippable product increment. Each sprint includes:
+
+Sprint Planning: Team selects user stories from the product backlog and commits to completing them within the sprint duration. Tasks are estimated using story points and broken down into manageable subtasks.
+
+Daily Stand-ups: Brief 15-minute meetings where team members discuss progress, plans for the day, and any blockers. This ensures transparency and rapid issue resolution.
+
+Sprint Review: At the end of each sprint, completed features are demonstrated to stakeholders for feedback and validation. This ensures alignment with user expectations and requirements.
+
+Sprint Retrospective: Team reflects on the sprint process, identifying what went well, what could be improved, and action items for the next sprint. This promotes continuous process improvement.
+
+**Iterative Development Cycles:**
+The project is divided into multiple iterations, each focusing on specific feature sets:
+
+Iteration 1 (Weeks 1-2): Project setup, environment configuration, basic backend API structure, database schema design, and initial authentication implementation.
+
+Iteration 2 (Weeks 3-4): Complete authentication system with JWT tokens, admin portal backend APIs, bus and driver management endpoints, and database integration testing.
+
+Iteration 3 (Weeks 5-6): Student and driver portal APIs, route and schedule management, feedback system implementation, and comprehensive API testing.
+
+Iteration 4 (Weeks 7-8): Frontend mobile application setup, landing page design, admin login screen, student and driver login interfaces, and navigation structure.
+
+Iteration 5 (Weeks 9-10): Dashboard implementations for all user roles, real-time GPS tracking integration, map rendering with markers, and location update mechanisms.
+
+Iteration 6 (Weeks 11-12): Push notification integration, feedback submission interfaces, schedule viewing screens, and profile management features.
+
+Iteration 7 (Weeks 13-14): Integration testing, bug fixes, performance optimization, UI/UX refinements, and deployment preparation.
+
+Iteration 8 (Weeks 15-16): User acceptance testing, documentation completion, deployment to production environment, and post-deployment monitoring.
+
+**User Story Driven Development:**
+Features are defined as user stories following the format: "As a [user type], I want [goal] so that [benefit]." Examples include:
+
+- As a student, I want to view my bus location in real-time so that I can plan my departure from home accordingly.
+- As a driver, I want to see my assigned route with all stops so that I can navigate efficiently.
+- As an administrator, I want to manage bus schedules so that I can ensure optimal service delivery.
+
+Each user story includes acceptance criteria that define when the story is considered complete, ensuring clear expectations and testable outcomes.
+
+5.2.2 Test-Driven Development (TDD) Practices
+
+While not strictly pure TDD, the project incorporates key TDD principles:
+
+**Unit Testing:**
+Individual functions and components are tested in isolation to ensure correctness. Backend API endpoints are tested using pytest with fixtures for database setup and teardown. Frontend components are tested with Jest and React Native Testing Library.
+
+Test coverage targets exceed 70% for critical business logic components including authentication, data validation, and core API operations. Automated tests run on every code commit through continuous integration pipelines.
+
+**Integration Testing:**
+Tests verify that different modules work correctly together. Database interactions, API request/response cycles, and authentication flows are tested end-to-end. Mock servers simulate external dependencies like GPS services and push notification providers.
+
+**User Acceptance Testing (UAT):**
+A pilot group of students, drivers, and administrators test the application in a staging environment. Feedback is collected through surveys and direct interviews, informing final refinements before production deployment.
+
+5.2.3 Continuous Integration and Deployment (CI/CD)
+
+**Version Control Workflow:**
+Git is used for distributed version control with a branch-based workflow:
+
+- main branch: Production-ready code, protected with required reviews
+- develop branch: Integration branch for completed features
+- feature/* branches: Individual feature development
+- bugfix/* branches: Bug fixes and patches
+- release/* branches: Release preparation and versioning
+
+Pull requests require code review approval before merging, ensuring code quality and knowledge sharing across the team.
+
+**Automated Testing Pipeline:**
+GitHub Actions or similar CI/CD tools automatically run tests on every push and pull request. The pipeline includes:
+
+1. Code linting and formatting checks (ESLint, Prettier, Flake8)
+2. Unit test execution with coverage reporting
+3. Integration test suite execution
+4. Build verification for mobile applications
+5. Security vulnerability scanning
+
+Failed tests block merging, maintaining code quality standards.
+
+**Deployment Automation:**
+Successful builds on the develop branch trigger automatic deployment to a staging environment. Production deployments are manually triggered after final verification but use automated scripts for consistency and reliability.
+
+5.2.4 Code Review and Collaboration Practices
+
+**Peer Code Reviews:**
+All code changes undergo peer review before merging. Reviewers check for:
+- Code correctness and logic errors
+- Adherence to coding standards and best practices
+- Security vulnerabilities and potential bugs
+- Performance implications
+- Test coverage and documentation quality
+
+**Pair Programming:**
+For complex features or challenging bugs, developers work in pairs. One developer (the driver) writes code while the other (the navigator) reviews in real-time, suggesting improvements and catching errors immediately.
+
+**Documentation Standards:**
+Code includes inline comments explaining complex logic. Functions and classes have docstrings describing purpose, parameters, return values, and usage examples. README files provide project overview, setup instructions, and contribution guidelines.
+
+================================================================================
+
+5.3 PROGRAMMING LANGUAGES USED
+
+5.3.1 Python 3.9+ (Backend Development)
+
+Python serves as the primary backend programming language for the TCE EduRide system. Python was chosen for its simplicity, readability, extensive library ecosystem, and strong support for web development and data processing.
+
+**Key Python Features Utilized:**
+
+Type Hints and Annotations:
+Python's type hinting system (PEP 484) is used extensively for static type checking and improved code documentation. FastAPI leverages type hints for automatic request validation and API documentation generation.
+
+Example:
+```python
+def create_bus(bus_number: str, capacity: int) -> Bus:
+    """Create a new bus with specified parameters."""
+    pass
+```
+
+Async/Await for Concurrency:
+Python's asyncio library enables asynchronous programming, allowing the backend to handle multiple concurrent requests efficiently without blocking.
+
+Example:
+```python
+async def get_buses() -> list[Bus]:
+    """Retrieve all buses asynchronously."""
+    return await db.query(Bus).all()
+```
+
+Context Managers:
+Python's context manager protocol (with statements) ensures proper resource management, particularly for database connections and file operations.
+
+Decorators:
+Python decorators provide elegant syntax for cross-cutting concerns like authentication, logging, and error handling.
+
+**Python Version Justification:**
+Python 3.9+ was selected for:
+- Dictionary merge operators (|) for cleaner code
+- Type hinting improvements with built-in generics (list[str] instead of List[str])
+- Performance enhancements over Python 3.8
+- Long-term support and security updates
+- Compatibility with all required libraries
+
+**Backend Application Structure:**
+The backend follows a modular architecture with clear separation of concerns:
+
+- API Routes: Handle HTTP requests and responses
+- Business Logic: Process data and implement core functionality
+- Data Access Layer: Interact with the database through ORM
+- Security Module: Authentication and authorization
+- Configuration: Environment-based settings management
+
+5.3.2 TypeScript (Frontend Development)
+
+TypeScript is used for frontend development, providing static typing on top of JavaScript. This brings compile-time error checking, better IDE support, and improved maintainability to the React Native codebase.
+
+**TypeScript Features Leveraged:**
+
+Static Type Checking:
+Types catch errors at compile time rather than runtime, reducing bugs and improving developer productivity.
+
+Example:
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: 'admin' | 'student' | 'driver';
+}
+
+function authenticateUser(credentials: LoginCredentials): Promise<User> {
+  // Implementation
+}
+```
+
+Interface and Type Definitions:
+Interfaces define contracts for objects, ensuring data structures are correctly shaped throughout the application.
+
+Generics:
+Generic types enable reusable components and functions that work with multiple data types while maintaining type safety.
+
+Enums:
+Enumerations provide named constants for sets of related values, improving code readability.
+
+**TypeScript Configuration:**
+The tsconfig.json file configures TypeScript compiler options:
+- strict: true - Enables all strict type checking options
+- esModuleInterop: true - Enables CommonJS/ES module interoperability
+- jsx: "react-native" - Configures JSX for React Native
+- target: "ES2020" - Specifies ECMAScript target version
+
+**Integration with React Native:**
+TypeScript integrates seamlessly with React Native, providing type checking for components, props, state, and hooks. Type definitions for React Native APIs and third-party libraries enable intelligent code completion and inline documentation.
+
+5.3.3 SQL (Database Queries)
+
+Structured Query Language (SQL) is used for database operations, primarily through SQLAlchemy ORM which translates Python objects into SQL queries.
+
+**SQL Usage Patterns:**
+
+DDL (Data Definition Language):
+CREATE TABLE, ALTER TABLE, and DROP TABLE statements define database schema. SQLAlchemy models generate these automatically through Alembic migrations.
+
+DML (Data Manipulation Language):
+SELECT, INSERT, UPDATE, and DELETE statements interact with data. SQLAlchemy ORM provides Pythonic interfaces that compile to optimized SQL.
+
+Complex Queries:
+JOIN operations combine data from multiple tables. WHERE clauses filter results based on conditions. ORDER BY and LIMIT clauses sort and paginate results.
+
+**Example SQL Operations (via SQLAlchemy):**
+
+```python
+# SELECT query with JOIN
+students = db.query(Student).join(Route).filter(Route.route_name == "Route A").all()
+
+# INSERT operation
+new_bus = Bus(bus_number="TN-01-AB-1234", capacity=50, model="Ashok Leyland")
+db.add(new_bus)
+db.commit()
+
+# UPDATE operation
+bus = db.query(Bus).filter(Bus.id == 1).first()
+bus.status = "maintenance"
+db.commit()
+
+# DELETE operation
+db.query(Feedback).filter(Feedback.id == 5).delete()
+db.commit()
+```
+
+5.3.4 JavaScript/JSX (React Native Components)
+
+While TypeScript is the primary frontend language, JavaScript and JSX syntax are used for React components and UI rendering.
+
+**JSX Syntax:**
+JSX allows writing HTML-like markup within JavaScript, making UI code more intuitive and declarative.
+
+Example:
+```jsx
+return (
+  <View style={styles.container}>
+    <Text style={styles.title}>TCE EduRide</Text>
+    <TouchableOpacity onPress={handleLogin}>
+      <Text>Login</Text>
+    </TouchableOpacity>
+  </View>
+);
+```
+
+**Component-Based Architecture:**
+React Native applications are built from reusable components. Functional components with hooks (useState, useEffect) manage state and side effects.
+
+5.3.5 Shell Scripting (Deployment and Automation)
+
+Bash and PowerShell scripts automate repetitive tasks like environment setup, database migrations, and deployment processes.
+
+Example deployment script:
+```bash
+#!/bin/bash
+git pull origin main
+pip install -r requirements.txt
+python -m alembic upgrade head
+sudo systemctl restart eduride-api
+```
+
+================================================================================
+
+5.4 ALGORITHMS USED
+
+5.4.1 Authentication Algorithm (JWT Token Generation and Validation)
+
+**Purpose:**
+Securely authenticate users and maintain stateless sessions across the distributed system.
+
+**Algorithm Description:**
+
+Token Generation Process:
+1. User submits credentials (username and password)
+2. System verifies credentials against database records
+3. If valid, generate JWT payload containing user ID, role, and expiration time
+4. Sign payload using secret key and HS256 algorithm
+5. Return signed token to client
+6. Client stores token and includes it in subsequent requests
+
+Token Validation Process:
+1. Client sends request with Authorization header containing JWT token
+2. Server extracts token from header
+3. Verify token signature using secret key
+4. Check token expiration timestamp
+5. If valid, extract user information from payload
+6. Grant access to requested resource
+7. If invalid, return 401 Unauthorized error
+
+**Mathematical Foundation:**
+JWT uses HMAC-SHA256 for signature generation:
+Signature = HMAC-SHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret_key)
+
+**Security Considerations:**
+- Tokens expire after 15 minutes (configurable)
+- Secret key is stored securely in environment variables
+- HTTPS ensures tokens cannot be intercepted in transit
+- Refresh tokens enable session renewal without credential reentry
+
+5.4.2 Haversine Distance Algorithm (GPS Distance Calculation)
+
+**Purpose:**
+Calculate the great-circle distance between two points on Earth's surface given their latitude and longitude coordinates. Used for estimating bus arrival times and route optimization.
+
+**Algorithm Description:**
+
+Given two points:
+- Point A: (lat1, lon1)
+- Point B: (lat2, lon2)
+
+Steps:
+1. Convert all latitude and longitude values from degrees to radians
+2. Calculate differences: Δlat = lat2 - lat1, Δlon = lon2 - lon1
+3. Compute:
+   a = sin²(Δlat/2) + cos(lat1) × cos(lat2) × sin²(Δlon/2)
+4. Compute:
+   c = 2 × atan2(√a, √(1−a))
+5. Calculate distance:
+   distance = R × c
+   where R = Earth's radius (6371 km or 3959 miles)
+
+**Mathematical Formula:**
+```
+a = sin²(Δφ/2) + cos(φ1) × cos(φ2) × sin²(Δλ/2)
+c = 2 × atan2(√a, √(1−a))
+d = R × c
+```
+where:
+- φ is latitude
+- λ is longitude
+- R is Earth's radius (mean radius = 6,371 km)
+
+**Implementation Considerations:**
+- Results accurate to within 0.5% for most distances
+- Assumes Earth is a perfect sphere (acceptable for distances < 500 km)
+- For higher accuracy, Vincenty formula can be used (more complex)
+
+**Use Cases in TCE EduRide:**
+- Calculate distance between bus current location and next stop
+- Estimate time to arrival based on distance and average speed
+- Determine if bus is within notification radius of a stop
+- Optimize route ordering by minimizing total distance
+
+5.4.3 Nearest Stop Finder Algorithm
+
+**Purpose:**
+Identify the closest bus stop to a given GPS coordinate, helping students find their pickup location and drivers navigate routes efficiently.
+
+**Algorithm Description:**
+
+Input: Target coordinate (target_lat, target_lon), list of stops with coordinates
+Output: Nearest stop object
+
+Process:
+1. Initialize min_distance = infinity, nearest_stop = null
+2. For each stop in stops_list:
+   a. Calculate distance from target to stop using Haversine formula
+   b. If distance < min_distance:
+      - Update min_distance = distance
+      - Update nearest_stop = current stop
+3. Return nearest_stop and min_distance
+
+**Complexity Analysis:**
+- Time Complexity: O(n) where n is the number of stops
+- Space Complexity: O(1) as only tracking minimum distance and stop
+- For large datasets, spatial indexing (R-tree) can reduce to O(log n)
+
+**Optimization Techniques:**
+- Pre-filter stops within bounding box before distance calculation
+- Use spatial database queries (PostGIS) for efficient geospatial lookups
+- Cache frequently accessed stops to reduce computation
+
+5.4.4 Route Optimization Algorithm (Traveling Salesman Problem - Greedy Approach)
+
+**Purpose:**
+Optimize bus route ordering to minimize total travel distance while visiting all designated stops.
+
+**Algorithm Description:**
+
+Greedy Nearest Neighbor Heuristic:
+
+Input: List of stops with coordinates, starting point
+Output: Ordered list of stops forming optimized route
+
+Process:
+1. Initialize current_stop = starting_point, visited = empty set, route = [current_stop]
+2. While unvisited stops remain:
+   a. Find nearest unvisited stop to current_stop using Haversine distance
+   b. Add nearest stop to route and visited set
+   c. Update current_stop = nearest stop
+3. Return route
+
+**Complexity Analysis:**
+- Time Complexity: O(n²) where n is number of stops
+- Provides approximate solution (not guaranteed optimal)
+- For small n (< 20 stops), sufficient for practical use
+
+**Advanced Optimization (Future Enhancement):**
+For larger route networks, more sophisticated algorithms can be implemented:
+- Genetic Algorithms for global optimization
+- Simulated Annealing for escaping local minima
+- Dynamic Programming for exact solutions (feasible for n < 15)
+
+5.4.5 Arrival Time Estimation Algorithm
+
+**Purpose:**
+Predict when a bus will arrive at a specific stop based on current location, traffic conditions, and historical data.
+
+**Algorithm Description:**
+
+Basic Estimation:
+1. Calculate distance from bus to target stop using Haversine formula
+2. Estimate average speed based on:
+   - Current GPS speed data
+   - Historical average speed for route segment
+   - Time of day factors (rush hour vs. off-peak)
+3. Compute estimated time:
+   ETA = distance / average_speed
+4. Add buffer time for stops between current location and target
+5. Return ETA in minutes
+
+Enhanced Estimation (Machine Learning - Future):
+1. Collect historical data: actual arrival times, traffic conditions, weather
+2. Train regression model (Random Forest, Gradient Boosting)
+3. Input features: distance, time of day, day of week, weather, past delays
+4. Model predicts ETA with confidence interval
+5. Continuously update model with new data for improved accuracy
+
+**Accuracy Improvements:**
+- Real-time traffic data integration from mapping APIs
+- Weather condition adjustments (rain/fog slows buses)
+- Event-based adjustments (college events, holidays)
+- Driver behavior patterns from historical data
+
+5.4.6 Notification Triggering Algorithm
+
+**Purpose:**
+Determine when to send push notifications to students based on bus proximity to their stop.
+
+**Algorithm Description:**
+
+Proximity-Based Notification:
+1. Continuously track bus location (every 10-30 seconds)
+2. For each stop on the route:
+   a. Calculate distance from bus to stop
+   b. If distance < notification_threshold (e.g., 1 km or 5 minutes):
+      - Check if notification already sent for this stop
+      - If not, retrieve list of students assigned to this stop
+      - Send push notification to all assigned students
+      - Mark notification as sent to prevent duplicates
+3. Repeat for all upcoming stops
+
+**Threshold Configuration:**
+- Distance-based: Notify when bus is within 1-2 km of stop
+- Time-based: Notify when ETA is 5-10 minutes
+- Adaptive: Learn user preferences and adjust timing
+
+**Notification Deduplication:**
+Maintain a cache of sent notifications with timestamp and stop ID to prevent sending multiple notifications for the same stop within a single trip.
+
+5.4.7 Data Validation and Sanitization Algorithm
+
+**Purpose:**
+Ensure all user input is valid, properly formatted, and safe from injection attacks.
+
+**Algorithm Description:**
+
+Input Validation Process:
+1. Receive input data from API request
+2. Check data types match expected types (string, integer, float)
+3. Validate string lengths against minimum and maximum constraints
+4. Verify numerical ranges (e.g., latitude between -90 and 90)
+5. Apply regex patterns for email, phone number, license plate formats
+6. Sanitize strings to remove potentially dangerous characters
+7. If validation fails, return 400 Bad Request with specific error messages
+8. If validation succeeds, proceed with business logic
+
+**SQL Injection Prevention:**
+- Use parameterized queries (prepared statements) for all database operations
+- SQLAlchemy ORM automatically escapes user input
+- Never concatenate user input directly into SQL strings
+
+**XSS Prevention:**
+- Escape HTML special characters in user-generated content
+- Use Content Security Policy headers
+- Validate and sanitize all text inputs
+
+================================================================================
+
+5.5 PSEUDOCODE OF THE PROJECT
+
+5.5.1 User Authentication Pseudocode
+
+**Admin Login Process:**
+
+```
+FUNCTION adminLogin(username, password):
+    BEGIN
+        // Input validation
+        IF username is empty OR password is empty THEN
+            RETURN error "Username and password are required"
+        END IF
+
+        // Database lookup
+        admin = DATABASE.query(Admin).filter(username == username).first()
+
+        IF admin is NULL THEN
+            RETURN error "Invalid credentials" with status 401
+        END IF
+
+        // Password verification
+        IF NOT verify_password(password, admin.password) THEN
+            RETURN error "Invalid credentials" with status 401
+        END IF
+
+        // Generate JWT token
+        token_payload = {
+            "user_id": admin.id,
+            "role": "admin",
+            "exp": current_time + 15_minutes
+        }
+        
+        access_token = jwt.encode(token_payload, SECRET_KEY, algorithm="HS256")
+
+        // Return successful response
+        RETURN {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": admin.id,
+                "username": admin.username,
+                "name": admin.name
+            }
+        }
+    END
+```
+
+**Token Verification Middleware:**
+
+```
+FUNCTION verifyToken(request):
+    BEGIN
+        // Extract token from header
+        auth_header = request.headers.get("Authorization")
+
+        IF auth_header is NULL OR NOT auth_header.startsWith("Bearer ") THEN
+            RETURN error "Missing or invalid authorization header" with status 401
+        END IF
+
+        token = auth_header.split("Bearer ")[1]
+
+        TRY
+            // Decode and verify token
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+
+            // Check expiration
+            IF payload.exp < current_time THEN
+                RETURN error "Token expired" with status 401
+            END IF
+
+            // Attach user info to request
+            request.user_id = payload.user_id
+            request.user_role = payload.role
+
+            RETURN success
+        CATCH JWTError:
+            RETURN error "Invalid token" with status 401
+        END TRY
+    END
+```
+
+5.5.2 Real-Time Bus Tracking Pseudocode
+
+**Driver Location Update:**
+
+```
+FUNCTION updateDriverLocation(driver_id, latitude, longitude):
+    BEGIN
+        // Verify driver exists
+        driver = DATABASE.query(Driver).filter(id == driver_id).first()
+
+        IF driver is NULL THEN
+            RETURN error "Driver not found" with status 404
+        END IF
+
+        // Validate coordinates
+        IF latitude < -90 OR latitude > 90 THEN
+            RETURN error "Invalid latitude"
+        END IF
+
+        IF longitude < -180 OR longitude > 180 THEN
+            RETURN error "Invalid longitude"
+        END IF
+
+        // Get driver's assigned bus
+        bus = driver.bus
+
+        IF bus is NULL THEN
+            RETURN error "No bus assigned to driver" with status 400
+        END IF
+
+        // Update or create location record
+        location = DATABASE.query(BusLocation).filter(bus_id == bus.id).first()
+
+        IF location is NULL THEN
+            location = NEW BusLocation(bus_id=bus.id)
+        END IF
+
+        location.latitude = latitude
+        location.longitude = longitude
+        location.updated_at = current_timestamp
+        location.speed = calculate_speed_from_gps()
+
+        DATABASE.save(location)
+
+        // Trigger notification check
+        checkProximityNotifications(bus.id, latitude, longitude)
+
+        RETURN success_response
+    END
+```
+
+**Student Bus Tracking View:**
+
+```
+FUNCTION getStudentBusLocation(student_id):
+    BEGIN
+        // Get student information
+        student = DATABASE.query(Student).filter(id == student_id).first()
+
+        IF student is NULL THEN
+            RETURN error "Student not found" with status 404
+        END IF
+
+        // Get student's assigned route
+        route = student.route
+
+        IF route is NULL THEN
+            RETURN error "No route assigned" with status 400
+        END IF
+
+        // Get schedule for current time
+        current_schedule = DATABASE.query(Schedule)
+            .filter(route_id == route.id)
+            .filter(start_time <= current_time <= end_time)
+            .first()
+
+        IF current_schedule is NULL THEN
+            RETURN {
+                "message": "No active schedule at this time",
+                "bus_location": NULL
+            }
+        END IF
+
+        // Get bus location
+        bus = current_schedule.bus
+        location = DATABASE.query(BusLocation)
+            .filter(bus_id == bus.id)
+            .first()
+
+        IF location is NULL OR location.updated_at < (current_time - 5_minutes) THEN
+            RETURN {
+                "message": "Bus location not available",
+                "bus_location": NULL
+            }
+        END IF
+
+        // Calculate ETA to student's stop
+        student_stop = find_student_stop(student.id, route.id)
+        distance = haversine_distance(
+            location.latitude, location.longitude,
+            student_stop.latitude, student_stop.longitude
+        )
+        
+        average_speed = 30  // km/h
+        eta_minutes = (distance / average_speed) * 60
+
+        RETURN {
+            "bus": {
+                "id": bus.id,
+                "bus_number": bus.bus_number,
+                "location": {
+                    "latitude": location.latitude,
+                    "longitude": location.longitude,
+                    "updated_at": location.updated_at
+                }
+            },
+            "eta_minutes": eta_minutes,
+            "distance_km": distance,
+            "route": route.route_name,
+            "stops": route.stops
+        }
+    END
+```
+
+5.5.3 Proximity Notification Pseudocode
+
+```
+FUNCTION checkProximityNotifications(bus_id, current_lat, current_lon):
+    BEGIN
+        // Get bus route and schedule
+        schedule = DATABASE.query(Schedule)
+            .filter(bus_id == bus_id)
+            .filter(is_active == TRUE)
+            .first()
+
+        IF schedule is NULL THEN
+            RETURN  // No active schedule
+        END IF
+
+        route = schedule.route
+        stops = route.stops.order_by(order ASC)
+
+        // Notification threshold (in kilometers)
+        NOTIFICATION_DISTANCE = 1.0
+
+        FOR EACH stop IN stops:
+            // Calculate distance to stop
+            distance = haversine_distance(
+                current_lat, current_lon,
+                stop.latitude, stop.longitude
+            )
+
+            IF distance <= NOTIFICATION_DISTANCE THEN
+                // Check if notification already sent
+                cache_key = f"notif_{bus_id}_{stop.id}_{today's_date}"
+                
+                IF NOT CACHE.exists(cache_key) THEN
+                    // Get students assigned to this stop
+                    students = DATABASE.query(Student)
+                        .filter(route_id == route.id)
+                        .filter(assigned_stop_id == stop.id)
+                        .all()
+
+                    // Send push notifications
+                    FOR EACH student IN students:
+                        notification_message = f"Bus {schedule.bus.bus_number} is approaching {stop.stop_name}. ETA: {calculate_eta(distance)} minutes"
+                        
+                        send_push_notification(
+                            user_id=student.id,
+                            title="Bus Arriving Soon",
+                            body=notification_message
+                        )
+                    END FOR
+
+                    // Mark notification as sent (cache for 12 hours)
+                    CACHE.set(cache_key, TRUE, expiration=12_hours)
+                END IF
+            END IF
+        END FOR
+    END
+```
+
+5.5.4 Haversine Distance Calculation Pseudocode
+
+```
+FUNCTION haversine_distance(lat1, lon1, lat2, lon2):
+    BEGIN
+        // Earth's radius in kilometers
+        R = 6371.0
+
+        // Convert degrees to radians
+        lat1_rad = lat1 * PI / 180
+        lon1_rad = lon1 * PI / 180
+        lat2_rad = lat2 * PI / 180
+        lon2_rad = lon2 * PI / 180
+
+        // Calculate differences
+        dlat = lat2_rad - lat1_rad
+        dlon = lon2_rad - lon1_rad
+
+        // Haversine formula
+        a = sin(dlat / 2)^2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)^2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        
+        // Calculate distance
+        distance = R * c
+
+        RETURN distance  // in kilometers
+    END
+```
+
+5.5.5 Bus Management Pseudocode
+
+**Create New Bus:**
+
+```
+FUNCTION createBus(bus_data):
+    BEGIN
+        // Validate required fields
+        IF bus_data.bus_number is empty THEN
+            RETURN error "Bus number is required"
+        END IF
+
+        IF bus_data.capacity <= 0 THEN
+            RETURN error "Capacity must be positive"
+        END IF
+
+        // Check for duplicate bus number
+        existing_bus = DATABASE.query(Bus)
+            .filter(bus_number == bus_data.bus_number)
+            .first()
+
+        IF existing_bus is NOT NULL THEN
+            RETURN error "Bus number already exists" with status 400
+        END IF
+
+        // Create new bus record
+        new_bus = NEW Bus(
+            bus_number=bus_data.bus_number,
+            capacity=bus_data.capacity,
+            model=bus_data.model,
+            registration_number=bus_data.registration_number,
+            status="active",
+            created_at=current_timestamp
+        )
+
+        DATABASE.add(new_bus)
+        DATABASE.commit()
+
+        // Return created bus
+        RETURN {
+            "id": new_bus.id,
+            "bus_number": new_bus.bus_number,
+            "capacity": new_bus.capacity,
+            "model": new_bus.model,
+            "status": new_bus.status
+        }
+    END
+```
+
+**Get All Buses with Filters:**
+
+```
+FUNCTION getAllBuses(status_filter, page, page_size):
+    BEGIN
+        // Build query
+        query = DATABASE.query(Bus)
+
+        // Apply status filter if provided
+        IF status_filter is NOT NULL THEN
+            query = query.filter(status == status_filter)
+        END IF
+
+        // Calculate pagination
+        offset = (page - 1) * page_size
+        total_count = query.count()
+
+        // Execute query with pagination
+        buses = query.offset(offset).limit(page_size).all()
+
+        // Format response
+        RETURN {
+            "total": total_count,
+            "page": page,
+            "page_size": page_size,
+            "buses": [
+                {
+                    "id": bus.id,
+                    "bus_number": bus.bus_number,
+                    "capacity": bus.capacity,
+                    "model": bus.model,
+                    "status": bus.status,
+                    "driver": bus.driver.name IF bus.driver ELSE NULL
+                }
+                FOR bus IN buses
+            ]
+        }
+    END
+```
+
+5.5.6 Feedback Submission Pseudocode
+
+```
+FUNCTION submitFeedback(student_id, feedback_data):
+    BEGIN
+        // Validate student
+        student = DATABASE.query(Student).filter(id == student_id).first()
+
+        IF student is NULL THEN
+            RETURN error "Student not found" with status 404
+        END IF
+
+        // Validate feedback data
+        IF feedback_data.rating < 1 OR feedback_data.rating > 5 THEN
+            RETURN error "Rating must be between 1 and 5"
+        END IF
+
+        IF feedback_data.category NOT IN ["service", "driver", "route", "bus", "other"] THEN
+            RETURN error "Invalid feedback category"
+        END IF
+
+        // Create feedback record
+        new_feedback = NEW Feedback(
+            student_id=student_id,
+            rating=feedback_data.rating,
+            category=feedback_data.category,
+            comment=feedback_data.comment,
+            route_id=student.route_id,
+            status="pending",
+            created_at=current_timestamp
+        )
+
+        DATABASE.add(new_feedback)
+        DATABASE.commit()
+
+        // Send notification to admin
+        send_admin_notification(
+            title="New Feedback Received",
+            body=f"New {feedback_data.category} feedback from {student.name}"
+        )
+
+        RETURN {
+            "id": new_feedback.id,
+            "message": "Feedback submitted successfully",
+            "status": "pending"
+        }
+    END
+```
+
+5.5.7 Route Stop Ordering Pseudocode
+
+```
+FUNCTION optimizeRouteStops(route_id, starting_point):
+    BEGIN
+        // Get all stops for the route
+        stops = DATABASE.query(RouteStop)
+            .filter(route_id == route_id)
+            .all()
+
+        IF stops.length == 0 THEN
+            RETURN empty_list
+        END IF
+
+        // Initialize
+        unvisited = stops.copy()
+        ordered_route = []
+        current_location = starting_point
+
+        // Greedy nearest neighbor algorithm
+        WHILE unvisited is NOT empty:
+            min_distance = infinity
+            nearest_stop = NULL
+
+            // Find nearest unvisited stop
+            FOR EACH stop IN unvisited:
+                distance = haversine_distance(
+                    current_location.latitude,
+                    current_location.longitude,
+                    stop.latitude,
+                    stop.longitude
+                )
+
+                IF distance < min_distance THEN
+                    min_distance = distance
+                    nearest_stop = stop
+                END IF
+            END FOR
+
+            // Add nearest stop to route
+            ordered_route.append(nearest_stop)
+            unvisited.remove(nearest_stop)
+            current_location = nearest_stop
+        END WHILE
+
+        // Update stop order in database
+        FOR i = 0 TO ordered_route.length - 1:
+            ordered_route[i].order = i + 1
+            DATABASE.update(ordered_route[i])
+        END FOR
+
+        DATABASE.commit()
+
+        RETURN ordered_route
+    END
+```
+
+================================================================================
+
+5.6 PACKAGES AND LIBRARIES
+
+5.6.1 Backend Python Packages
+
+**FastAPI (Version 0.115.5):**
+FastAPI is the core web framework for building the RESTful API. It provides:
+- Automatic API documentation (Swagger UI at /docs, ReDoc at /redoc)
+- Request/response validation using Pydantic models
+- Dependency injection system for clean code organization
+- Async/await support for high-performance concurrent operations
+- WebSocket support for real-time communication
+- Built-in security utilities (OAuth2, JWT)
+
+Installation:
+```
+pip install fastapi==0.115.5
+```
+
+Key Usage:
+- Defining API endpoints with decorators (@app.get, @app.post)
+- Path and query parameter validation
+- Request body parsing and validation
+- Response model serialization
+
+**Uvicorn (Version 0.32.1):**
+Uvicorn is a lightning-fast ASGI (Asynchronous Server Gateway Interface) server implementation. It serves as the runtime for the FastAPI application.
+
+Features:
+- HTTP/1.1 and WebSocket protocol support
+- Built on uvloop and httptools for maximum performance
+- Graceful shutdown and reload capabilities
+- Production-ready with proper error handling
+
+Installation:
+```
+pip install uvicorn[standard]==0.32.1
+```
+
+Usage:
+```
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**SQLAlchemy (Version 2.0.36):**
+SQLAlchemy is Python's premier SQL toolkit and Object-Relational Mapping (ORM) library. It provides:
+- Database-agnostic API supporting PostgreSQL, MySQL, SQLite, Oracle
+- ORM for mapping Python classes to database tables
+- Query construction using Pythonic syntax
+- Connection pooling for efficient database access
+- Transaction management with ACID guarantees
+- Relationship definitions (one-to-one, one-to-many, many-to-many)
+
+Installation:
+```
+pip install sqlalchemy==2.0.36
+```
+
+Key Usage:
+- Defining database models as Python classes
+- Querying data with filter, join, and aggregate operations
+- Managing database sessions and transactions
+
+**Alembic (Version 1.14.0):**
+Alembic is a database migration tool for SQLAlchemy. It manages schema changes over time, allowing:
+- Version-controlled database schema changes
+- Upgrade and downgrade migrations
+- Automatic migration generation from model changes
+- Team collaboration on schema evolution
+
+Installation:
+```
+pip install alembic==1.14.0
+```
+
+Usage:
+```
+alembic revision --autogenerate -m "Add feedback table"
+alembic upgrade head
+```
+
+**Pydantic (Version 2.10.3):**
+Pydantic provides data validation and settings management using Python type annotations. It powers FastAPI's automatic request validation.
+
+Features:
+- Runtime type checking and data validation
+- Automatic JSON serialization/deserialization
+- Custom validators for complex validation logic
+- Settings management from environment variables
+- Detailed error messages for validation failures
+
+Installation:
+```
+pip install pydantic==2.10.3
+```
+
+Key Usage:
+- Defining request/response schemas
+- Validating API input data
+- Configuration management through pydantic-settings
+
+**Pydantic-Settings (Version 2.6.1):**
+Extension of Pydantic for managing application settings from environment variables and configuration files.
+
+Installation:
+```
+pip install pydantic-settings==2.6.1
+```
+
+Usage:
+```python
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    database_url: str
+    secret_key: str
+    
+    class Config:
+        env_file = ".env"
+```
+
+**Python-Dotenv (Version 1.0.1):**
+Loads environment variables from .env files, keeping sensitive configuration separate from code.
+
+Installation:
+```
+pip install python-dotenv==1.0.1
+```
+
+Usage:
+```python
+from dotenv import load_dotenv
+load_dotenv()
+```
+
+**Python-Multipart (Version 0.0.19):**
+Provides support for parsing multipart/form-data requests, essential for file uploads.
+
+Installation:
+```
+pip install python-multipart==0.0.19
+```
+
+**HTTPX (Version 0.28.1):**
+Modern HTTP client library with async support, used for making external API calls (e.g., geocoding services).
+
+Installation:
+```
+pip install httpx==0.28.1
+```
+
+Features:
+- Async and sync APIs
+- HTTP/2 support
+- Timeout configuration
+- Connection pooling
+
+**Pytest (Version 8.3.4):**
+Testing framework for Python, used for unit and integration tests.
+
+Installation:
+```
+pip install pytest==8.3.4
+```
+
+Usage:
+```
+pytest tests/ -v --cov=app
+```
+
+**Pytest-Asyncio (Version 0.24.0):**
+Plugin for pytest enabling testing of async functions.
+
+Installation:
+```
+pip install pytest-asyncio==0.24.0
+```
+
+**PyJWT (JSON Web Tokens):**
+Library for encoding and decoding JWT tokens for authentication.
+
+Installation:
+```
+pip install pyjwt==2.8.0
+```
+
+Usage:
+```python
+import jwt
+
+token = jwt.encode({"user_id": 1}, "secret", algorithm="HS256")
+payload = jwt.decode(token, "secret", algorithms=["HS256"])
+```
+
+**Bcrypt:**
+Password hashing library using the bcrypt algorithm.
+
+Installation:
+```
+pip install bcrypt==4.1.2
+```
+
+Usage:
+```python
+import bcrypt
+
+hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+is_valid = bcrypt.checkpw(password.encode(), hashed)
+```
+
+**Python-Jose:**
+Alternative JWT implementation with additional encryption support.
+
+Installation:
+```
+pip install python-jose[cryptography]==3.3.0
+```
+
+**Passlib:**
+Comprehensive password hashing library with support for multiple algorithms.
+
+Installation:
+```
+pip install passlib[bcrypt]==1.7.4
+```
+
+5.6.2 Frontend JavaScript/TypeScript Packages
+
+**React Native (Version 0.76.5):**
+Core framework for building cross-platform mobile applications.
+
+Installation:
+```
+npm install react-native@0.76.5
+```
+
+**Expo (SDK 52.0.0):**
+Platform and framework built around React Native for easier development.
+
+Installation:
+```
+npm install expo@~52.0.0
+```
+
+Included Expo Packages:
+- expo-status-bar: Manage status bar appearance
+- expo-font: Custom font loading
+- expo-linear-gradient: Gradient backgrounds
+- expo-location: GPS location services
+- expo-notifications: Push notifications
+- expo-router: File-based navigation
+
+**React (Version 18.3.1):**
+JavaScript library for building user interfaces.
+
+Installation:
+```
+npm install react@18.3.1
+```
+
+**React Navigation:**
+Routing and navigation library for React Native.
+
+Installation:
+```
+npm install @react-navigation/native @react-navigation/stack @react-navigation/bottom-tabs
+```
+
+Components:
+- Stack Navigator: Screen stack management
+- Bottom Tabs Navigator: Tab-based navigation
+- Drawer Navigator: Side menu navigation
+
+**Axios (Version 1.7.2):**
+Promise-based HTTP client for API communication.
+
+Installation:
+```
+npm install axios@1.7.2
+```
+
+Features:
+- Request/response interceptors
+- Automatic JSON transformation
+- Timeout configuration
+- Error handling
+
+**React Native Maps:**
+Interactive map component for iOS and Android.
+
+Installation:
+```
+npm install react-native-maps
+```
+
+Components:
+- MapView: Main map container
+- Marker: Pin locations on map
+- Polyline: Draw routes
+- Circle: Proximity indicators
+
+**Expo Vector Icons:**
+Icon library with thousands of customizable icons.
+
+Installation (included with Expo):
+```
+npm install @expo/vector-icons
+```
+
+Icon Sets:
+- MaterialCommunityIcons
+- Ionicons
+- FontAwesome
+- AntDesign
+
+**AsyncStorage:**
+Persistent key-value storage for React Native.
+
+Installation:
+```
+npm install @react-native-async-storage/async-storage
+```
+
+Usage:
+```typescript
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+await AsyncStorage.setItem('token', accessToken);
+const token = await AsyncStorage.getItem('token');
+```
+
+**TypeScript (Version 5.3.3):**
+Typed superset of JavaScript providing compile-time type checking.
+
+Installation:
+```
+npm install --save-dev typescript@5.3.3
+```
+
+**React Native Gesture Handler:**
+Declarative API for gesture recognition.
+
+Installation:
+```
+npm install react-native-gesture-handler
+```
+
+**React Native Reanimated:**
+Powerful animation library for smooth 60 FPS animations.
+
+Installation:
+```
+npm install react-native-reanimated
+```
+
+**React Native Safe Area Context:**
+Handles safe area insets for notched devices.
+
+Installation:
+```
+npm install react-native-safe-area-context
+```
+
+**Expo Linking:**
+Deep linking and URL handling.
+
+Installation (included with Expo):
+Enables opening app from URLs and handling navigation.
+
+**Date-fns:**
+Modern JavaScript date utility library.
+
+Installation:
+```
+npm install date-fns
+```
+
+Usage:
+```typescript
+import { format, parseISO } from 'date-fns';
+
+const formatted = format(new Date(), 'yyyy-MM-dd HH:mm');
+```
+
+5.6.3 Development and Build Tools
+
+**Node.js (Version 18 LTS):**
+JavaScript runtime environment for frontend tooling.
+
+**npm/Yarn:**
+Package managers for JavaScript dependencies.
+
+**ESLint:**
+Linting tool for identifying and fixing code issues.
+
+Installation:
+```
+npm install --save-dev eslint
+```
+
+**Prettier:**
+Code formatter for consistent style.
+
+Installation:
+```
+npm install --save-dev prettier
+```
+
+**Jest:**
+JavaScript testing framework.
+
+Installation:
+```
+npm install --save-dev jest
+```
+
+**React Native Testing Library:**
+Testing utilities for React Native components.
+
+Installation:
+```
+npm install --save-dev @testing-library/react-native
+```
+
+**Metro Bundler:**
+JavaScript bundler for React Native (included with React Native).
+
+**Babel:**
+JavaScript compiler for transforming modern JavaScript (included with Expo).
+
+5.6.4 Database and Caching
+
+**PostgreSQL:**
+Production relational database system.
+
+**psycopg2:**
+PostgreSQL adapter for Python.
+
+Installation:
+```
+pip install psycopg2-binary==2.9.9
+```
+
+**Redis (Optional):**
+In-memory data structure store for caching.
+
+Installation:
+```
+pip install redis==5.0.1
+```
+
+5.6.5 Deployment and DevOps Tools
+
+**Docker:**
+Containerization platform for packaging applications.
+
+**Docker Compose:**
+Tool for defining multi-container Docker applications.
+
+**Nginx:**
+Web server and reverse proxy.
+
+**Gunicorn (Alternative to Uvicorn):**
+Python WSGI HTTP server for production.
+
+Installation:
+```
+pip install gunicorn==21.2.0
+```
+
+**Supervisor:**
+Process control system for managing application processes.
+
+5.6.6 Monitoring and Logging
+
+**Python Logging Module:**
+Built-in logging functionality for Python.
+
+Usage:
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.info("Application started")
+```
+
+**Sentry (Optional):**
+Error tracking and monitoring service.
+
+Installation:
+```
+pip install sentry-sdk[fastapi]==1.40.0
+```
+
+5.6.7 Third-Party Service SDKs
+
+**Firebase Admin SDK:**
+Backend SDK for Firebase services.
+
+Installation:
+```
+pip install firebase-admin==6.4.0
+```
+
+**Google Maps API Client:**
+Python client for Google Maps services.
+
+Installation:
+```
+pip install googlemaps==4.10.0
+```
+
+================================================================================
+
+5.7 DEPENDENCY MANAGEMENT
+
+5.7.1 Backend Dependencies (requirements.txt)
+
+The backend project maintains all Python dependencies in requirements.txt:
+
+```
+# Core Framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# Database
+sqlalchemy==2.0.36
+alembic==1.14.0
+psycopg2-binary==2.9.9
+
+# Utilities
+python-dotenv==1.0.1
+python-multipart==0.0.19
+
+# HTTP Client
+httpx==0.28.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+
+# Security (if implementing proper hashing)
+bcrypt==4.1.2
+python-jose[cryptography]==3.3.0
+```
+
+Installation:
+```
+pip install -r requirements.txt
+```
+
+5.7.2 Frontend Dependencies (package.json)
+
+The frontend project lists all Node.js dependencies in package.json:
+
+```json
+{
+  "dependencies": {
+    "expo": "~52.0.0",
+    "expo-router": "~4.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.5",
+    "axios": "^1.7.2",
+    "expo-linear-gradient": "~14.0.1",
+    "@expo/vector-icons": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.3",
+    "typescript": "~5.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  }
+}
+```
+
+Installation:
+```
+npm install
+```
+
+================================================================================
+
+5.8 SUMMARY
+
+This chapter provided a comprehensive overview of the implementation phase of the TCE EduRide Bus Tracking System. The development follows Agile methodologies with sprint-based iterations, continuous integration, and test-driven development practices. Code reviews, pair programming, and comprehensive documentation ensure high code quality and team collaboration.
+
+The project utilizes Python 3.9+ with FastAPI for backend development, providing high-performance RESTful APIs with automatic documentation and validation. TypeScript with React Native and Expo powers the cross-platform mobile frontend, enabling a single codebase for Android and iOS platforms. SQL through SQLAlchemy ORM manages database operations with type safety and abstraction.
+
+Key algorithms implemented include JWT token-based authentication, Haversine distance calculation for GPS coordinates, nearest stop finder, route optimization using greedy nearest neighbor heuristic, arrival time estimation, and proximity-based notification triggering. Detailed pseudocode for authentication, bus tracking, notification, distance calculation, bus management, feedback submission, and route optimization provides clear implementation guidance.
+
+The chapter documented over 40 packages and libraries across backend Python dependencies (FastAPI, SQLAlchemy, Pydantic, Uvicorn), frontend JavaScript/TypeScript dependencies (React Native, Expo, Axios, React Navigation), development tools (ESLint, Prettier, Jest, Pytest), and third-party services (Firebase, Google Maps). Each package's purpose, installation method, and key usage patterns were explained in detail.
+
+This implementation foundation enables the TCE EduRide system to deliver real-time bus tracking, role-based interfaces, secure authentication, and comprehensive management capabilities for educational institution transportation systems. The next chapter will present testing strategies, results, and performance evaluations that validate the system's correctness and reliability.
+
+================================================================================
+
+End of Chapter 5

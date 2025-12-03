@@ -1,0 +1,807 @@
+CHAPTER 3: SYSTEM REQUIREMENTS AND SPECIFICATIONS
+
+================================================================================
+
+3.1 INTRODUCTION
+
+This chapter provides a comprehensive overview of the hardware and software requirements, functional and non-functional specifications, and technologies utilized in the development of the TCE EduRide Bus Tracking System. Understanding these requirements is essential for successful system implementation, deployment, and maintenance. The specifications outlined in this chapter serve as a blueprint for the development process and ensure that the system meets the needs of all stakeholders—students, drivers, and administrators.
+
+The requirements are categorized into hardware requirements (for both development and deployment), software requirements (development tools, frameworks, and runtime environments), functional requirements (what the system should do), and non-functional requirements (how the system should perform). Additionally, a detailed discussion of the technologies employed provides insights into the technical stack and architectural decisions that underpin the TCE EduRide platform.
+
+================================================================================
+
+3.2 HARDWARE REQUIREMENTS
+
+3.2.1 Development Environment Hardware
+
+The development of the TCE EduRide system requires adequate computing resources to support modern development tools, emulators, and testing environments:
+
+**Developer Workstation Specifications:**
+
+Processor:
+- Minimum: Intel Core i5 (8th Gen) or AMD Ryzen 5 equivalent
+- Recommended: Intel Core i7 (10th Gen or later) or AMD Ryzen 7 equivalent
+- Purpose: Compiling code, running development servers, and mobile emulators
+
+Memory (RAM):
+- Minimum: 8 GB DDR4
+- Recommended: 16 GB DDR4 or higher
+- Purpose: Running IDE, backend servers, database, Android/iOS emulators simultaneously
+
+Storage:
+- Minimum: 256 GB SSD
+- Recommended: 512 GB NVMe SSD or higher
+- Purpose: Fast read/write speeds for development tools, project files, and dependencies
+
+Graphics:
+- Integrated graphics sufficient for development
+- Dedicated GPU (optional) for enhanced Android emulator performance
+
+Display:
+- Minimum: 1920x1080 Full HD resolution
+- Recommended: 2560x1440 or higher for multitasking
+- Purpose: Viewing code, design mockups, and testing interfaces simultaneously
+
+Network Connectivity:
+- Broadband internet connection (minimum 10 Mbps)
+- Required for downloading dependencies, cloud services, and API testing
+
+3.2.2 Mobile Device Requirements
+
+For testing and deployment, the system supports the following mobile device specifications:
+
+**Student and Driver Mobile Devices:**
+
+Operating System:
+- Android: Version 8.0 (Oreo) or later
+- iOS: Version 12.0 or later
+
+Processor:
+- Minimum: Quad-core processor running at 1.5 GHz
+- Supports smooth map rendering and real-time GPS tracking
+
+Memory:
+- Minimum: 2 GB RAM for Android, 2 GB for iOS
+- Recommended: 4 GB RAM or higher for optimal performance
+
+Storage:
+- Minimum: 100 MB available space for app installation
+- Additional space for cached map data and media
+
+GPS Capability:
+- Built-in GPS receiver with A-GPS support
+- Essential for real-time location tracking
+- Accuracy within 10-15 meters under normal conditions
+
+Network Connectivity:
+- 4G LTE or higher for real-time data transmission
+- Wi-Fi support for reduced data consumption
+- Fallback to 3G for basic functionality
+
+Battery:
+- Minimum 2500 mAh capacity
+- Background location tracking optimized for battery efficiency
+
+Sensors:
+- Accelerometer and gyroscope for motion detection
+- Compass for directional information
+
+3.2.3 Server Infrastructure Requirements
+
+For production deployment, the backend system requires reliable server infrastructure:
+
+**Backend Server Specifications:**
+
+Processor:
+- Minimum: 4 vCPU cores
+- Recommended: 8 vCPU cores for high traffic
+- Cloud instances: AWS EC2 t3.large or equivalent
+
+Memory:
+- Minimum: 8 GB RAM
+- Recommended: 16 GB RAM for concurrent users and caching
+- Scalable based on user load
+
+Storage:
+- Minimum: 100 GB SSD
+- Recommended: 500 GB SSD with backup capabilities
+- Database storage scales with usage patterns
+
+Network:
+- Minimum bandwidth: 100 Mbps
+- DDoS protection and firewall
+- Load balancing for high availability
+
+Backup Systems:
+- Redundant storage for database backups
+- Automated daily backups with 30-day retention
+- Geographic redundancy for disaster recovery
+
+3.2.4 GPS Tracking Hardware (For Buses)
+
+Buses require GPS tracking devices for real-time location monitoring:
+
+**GPS Device Specifications:**
+
+GPS Module:
+- High-sensitivity GPS receiver
+- Support for GPS, GLONASS, and Galileo satellites
+- Cold start time: <30 seconds
+- Hot start time: <5 seconds
+
+Cellular Connectivity:
+- 4G LTE module for data transmission
+- SIM card slot with multi-carrier support
+- Fallback to 3G/2G networks
+
+Power Supply:
+- Direct connection to vehicle battery (12V/24V)
+- Built-in backup battery (4-6 hours)
+- Low power consumption in standby mode
+
+Mounting:
+- Weather-resistant enclosure (IP65 rated)
+- Vibration-resistant mounting
+- Compact form factor for dashboard installation
+
+Optional Features:
+- OBD-II interface for vehicle diagnostics
+- Emergency panic button
+- Driver identification (RFID/NFC)
+
+================================================================================
+
+3.3 SOFTWARE REQUIREMENTS
+
+3.3.1 Development Tools and Environments
+
+The development of TCE EduRide requires a comprehensive set of software tools:
+
+**Operating System:**
+- Windows 10/11 (64-bit)
+- macOS 11.0 Big Sur or later
+- Linux Ubuntu 20.04 LTS or later
+- Purpose: Development environment hosting
+
+**Integrated Development Environment (IDE):**
+- Visual Studio Code (Recommended)
+  - Version: Latest stable release
+  - Extensions: Python, Pylance, React Native Tools, ESLint, Prettier
+- PyCharm Professional (Alternative for backend)
+- Android Studio (for Android-specific development)
+- Xcode (for iOS development on macOS)
+
+**Version Control:**
+- Git (Version 2.30 or later)
+- GitHub account for repository hosting
+- Git GUI client (optional): GitHub Desktop, GitKraken
+
+**Backend Development:**
+- Python: Version 3.9 or later
+- FastAPI: Version 0.115.5
+- Uvicorn: Version 0.32.1 (ASGI server)
+- pip: Python package manager
+
+**Frontend Development:**
+- Node.js: Version 18 LTS or later
+- npm or yarn: Package manager
+- Expo CLI: For React Native development
+- React Native: Version 0.76.5
+- Expo SDK: Version 52.0.0
+
+**Database Management:**
+- SQLite: For development and testing
+- PostgreSQL: Version 14 or later (production)
+- Database GUI tools: pgAdmin, DBeaver, or TablePlus
+
+**API Testing Tools:**
+- Postman or Insomnia: API endpoint testing
+- Swagger UI: Integrated with FastAPI for documentation
+- Thunder Client (VS Code extension): Lightweight API testing
+
+**Mobile Testing:**
+- Android Emulator (via Android Studio)
+- iOS Simulator (via Xcode on macOS)
+- Expo Go app (for physical device testing)
+
+**Design and Prototyping:**
+- Figma or Adobe XD: UI/UX design
+- Draw.io or Lucidchart: System diagrams and flowcharts
+
+3.3.2 Runtime and Deployment Software
+
+**Backend Runtime:**
+- Python 3.9+ runtime environment
+- Virtual environment (venv or virtualenv)
+- System dependencies: libpq-dev (PostgreSQL), build-essential
+
+**Frontend Runtime:**
+- Node.js runtime
+- React Native runtime dependencies
+- Platform-specific build tools (Gradle for Android, Xcode for iOS)
+
+**Web Server and Reverse Proxy:**
+- Nginx or Apache: Reverse proxy and load balancing
+- SSL/TLS certificates: Let's Encrypt for HTTPS
+
+**Containerization (Optional):**
+- Docker: Version 20.10 or later
+- Docker Compose: Multi-container orchestration
+
+**Cloud Services:**
+- Cloud hosting platform: AWS, Google Cloud, or Azure
+- Database hosting: Managed PostgreSQL service
+- Storage: Cloud storage for media files (AWS S3, Google Cloud Storage)
+
+**Monitoring and Logging:**
+- Application monitoring: New Relic, DataDog, or Prometheus
+- Log aggregation: ELK Stack (Elasticsearch, Logstash, Kibana)
+- Error tracking: Sentry
+
+3.3.3 Third-Party Services and APIs
+
+**Maps and Location Services:**
+- Google Maps API: Map rendering and geocoding
+- Mapbox (Alternative): Custom map styling
+- OpenStreetMap (Alternative): Open-source mapping
+
+**Push Notifications:**
+- Firebase Cloud Messaging (FCM): Android push notifications
+- Apple Push Notification Service (APNS): iOS notifications
+- Expo Push Notification Service: Unified notification handling
+
+**Authentication:**
+- JWT (JSON Web Tokens): Token-based authentication
+- bcrypt: Password hashing
+
+**Communication:**
+- SMS Gateway (optional): Twilio or similar for SMS notifications
+- Email service: SendGrid or SMTP server
+
+================================================================================
+
+3.4 FUNCTIONAL REQUIREMENTS
+
+Functional requirements define what the system should do—the specific behaviors, functions, and features expected from the TCE EduRide platform.
+
+3.4.1 User Authentication and Authorization
+
+FR-1: User Registration
+- The system shall allow administrators to register new users (students and drivers)
+- Each user shall have a unique identifier (username/email)
+- Users shall be assigned specific roles (admin, student, driver)
+
+FR-2: User Login
+- The system shall provide secure login functionality for all user types
+- Authentication shall use username/email and password credentials
+- System shall generate JWT tokens upon successful authentication
+
+FR-3: Password Management
+- Users shall be able to reset forgotten passwords
+- Passwords shall be encrypted using industry-standard hashing algorithms
+- System shall enforce strong password policies (minimum length, complexity)
+
+FR-4: Session Management
+- The system shall maintain user sessions with configurable timeout periods
+- Access tokens shall expire after a defined period (15 minutes)
+- Refresh tokens shall allow session renewal without re-authentication
+
+3.4.2 Student Portal Features
+
+FR-5: Bus Tracking
+- Students shall view real-time location of assigned buses on an interactive map
+- System shall display estimated arrival time at student's designated stop
+- Map shall update location every 10-30 seconds
+
+FR-6: Schedule Viewing
+- Students shall access their bus schedules showing pickup times and routes
+- Schedule shall display all stops along the route with timings
+- Students shall view schedules for different days of the week
+
+FR-7: Notifications
+- Students shall receive push notifications for bus arrivals
+- System shall alert students about delays or route changes
+- Notifications shall be customizable (enable/disable specific types)
+
+FR-8: Feedback Submission
+- Students shall submit feedback about their travel experience
+- Feedback form shall include rating, comments, and category selection
+- Students shall view history of their submitted feedback
+
+FR-9: Profile Management
+- Students shall view and update their profile information
+- System shall display assigned bus and route details
+- Students shall be able to change their password
+
+3.4.3 Driver Portal Features
+
+FR-10: Location Sharing
+- Drivers shall share their real-time GPS location automatically
+- System shall update driver location in the background
+- Drivers shall have control to start/stop location sharing
+
+FR-11: Route Information
+- Drivers shall view their assigned routes with all stops
+- System shall display route map with turn-by-turn directions
+- Drivers shall access student pickup/drop-off details
+
+FR-12: Schedule Access
+- Drivers shall view their daily and weekly schedules
+- System shall display assigned buses and time slots
+- Drivers shall receive notifications for schedule changes
+
+FR-13: Incident Reporting
+- Drivers shall report incidents (breakdowns, delays, emergencies)
+- System shall send incident alerts to administrators
+- Drivers shall provide estimated delay times
+
+FR-14: Profile Management
+- Drivers shall view their profile and assigned bus details
+- System shall display driver license and contact information
+- Drivers shall update emergency contact details
+
+3.4.4 Admin Portal Features
+
+FR-15: Dashboard and Analytics
+- Administrators shall view comprehensive dashboard with key metrics
+- Dashboard shall display total buses, active routes, registered users
+- System shall show real-time status of all buses on a central map
+
+FR-16: Bus Management
+- Administrators shall add, edit, and delete bus records
+- Each bus shall have unique identifier, number, capacity, and status
+- System shall track bus maintenance schedules and history
+
+FR-17: Driver Management
+- Administrators shall create, update, and delete driver accounts
+- System shall assign buses and routes to drivers
+- Administrators shall view driver performance and feedback ratings
+
+FR-18: Student Management
+- Administrators shall manage student accounts and information
+- System shall assign students to specific buses and routes
+- Administrators shall generate student lists and reports
+
+FR-19: Route Management
+- Administrators shall create and modify bus routes
+- Routes shall include multiple stops with GPS coordinates
+- System shall support route optimization based on student locations
+
+FR-20: Schedule Management
+- Administrators shall create and manage bus schedules
+- System shall assign buses, drivers, and routes to time slots
+- Schedules shall support recurring patterns (daily, weekly)
+
+FR-21: Feedback Management
+- Administrators shall view all feedback submitted by students and drivers
+- System shall categorize feedback by type (service, driver, route)
+- Administrators shall respond to feedback and mark as resolved
+
+FR-22: Report Generation
+- System shall generate usage reports (daily, weekly, monthly)
+- Reports shall include metrics on ridership, delays, and incidents
+- Administrators shall export reports in PDF and CSV formats
+
+3.4.5 System-Level Functions
+
+FR-23: Real-Time Data Processing
+- System shall process GPS location updates within 2 seconds
+- Database shall handle concurrent read/write operations
+- System shall maintain data consistency across all user interfaces
+
+FR-24: Data Validation
+- All user inputs shall be validated for correctness and security
+- System shall prevent SQL injection and XSS attacks
+- API requests shall require authentication tokens
+
+FR-25: Error Handling
+- System shall gracefully handle errors and display user-friendly messages
+- Backend shall log all errors for debugging and monitoring
+- System shall provide appropriate HTTP status codes for API responses
+
+================================================================================
+
+3.5 NON-FUNCTIONAL REQUIREMENTS
+
+Non-functional requirements specify how the system should perform—quality attributes, performance criteria, and constraints.
+
+3.5.1 Performance Requirements
+
+NFR-1: Response Time
+- API endpoints shall respond within 500 milliseconds under normal load
+- Mobile app shall load initial screen within 2 seconds
+- Map rendering shall complete within 3 seconds
+
+NFR-2: Throughput
+- System shall support minimum 500 concurrent users
+- Backend shall handle 1000 API requests per minute
+- Database shall process 100 transactions per second
+
+NFR-3: Scalability
+- System architecture shall support horizontal scaling
+- Database shall handle growing data volume (up to 10,000 users)
+- Cloud infrastructure shall auto-scale based on traffic
+
+NFR-4: Real-Time Updates
+- GPS location updates shall occur every 10-30 seconds
+- Push notifications shall be delivered within 5 seconds
+- Map markers shall update without manual refresh
+
+3.5.2 Security Requirements
+
+NFR-5: Authentication Security
+- All passwords shall be hashed using bcrypt with salt
+- JWT tokens shall use 256-bit encryption
+- System shall implement multi-factor authentication (future enhancement)
+
+NFR-6: Data Encryption
+- All data transmission shall use HTTPS/TLS 1.3
+- Sensitive data at rest shall be encrypted
+- API endpoints shall require valid authentication tokens
+
+NFR-7: Access Control
+- Role-based access control (RBAC) shall restrict functionality by user type
+- Students shall not access admin or driver features
+- System shall log all authentication attempts
+
+NFR-8: Privacy Protection
+- System shall comply with data protection regulations (GDPR, CCPA)
+- Users shall provide consent for location tracking
+- Personal data shall be anonymized in analytics reports
+
+3.5.3 Reliability and Availability
+
+NFR-9: System Uptime
+- System shall maintain 99.5% uptime (excluding scheduled maintenance)
+- Backend services shall implement health check endpoints
+- System shall recover from failures within 5 minutes
+
+NFR-10: Data Backup
+- Database shall be backed up daily with 30-day retention
+- Backup verification shall occur weekly
+- System shall support point-in-time recovery
+
+NFR-11: Error Recovery
+- Application shall handle network failures gracefully
+- System shall retry failed operations (up to 3 attempts)
+- Users shall receive clear error messages with resolution steps
+
+NFR-12: Fault Tolerance
+- System shall continue operation if non-critical services fail
+- Database connections shall use connection pooling
+- API shall implement circuit breaker pattern for external services
+
+3.5.4 Usability Requirements
+
+NFR-13: User Interface Design
+- Interface shall follow modern mobile UI/UX design principles
+- Navigation shall be intuitive with maximum 3 taps to any feature
+- System shall maintain consistent design language across platforms
+
+NFR-14: Accessibility
+- Application shall support minimum font size of 14pt
+- Color contrast shall meet WCAG 2.1 AA standards
+- System shall support screen readers (future enhancement)
+
+NFR-15: Localization
+- System shall support English language interface
+- Date/time formats shall adapt to user's locale
+- System shall support multiple languages (future enhancement)
+
+NFR-16: Help and Documentation
+- Application shall provide in-app help tooltips
+- System shall include user manual and FAQ section
+- Error messages shall be descriptive and actionable
+
+3.5.5 Maintainability Requirements
+
+NFR-17: Code Quality
+- Code shall follow PEP 8 (Python) and ESLint (JavaScript) standards
+- Test coverage shall exceed 70% for critical components
+- Code shall include inline documentation and comments
+
+NFR-18: Modularity
+- System shall follow microservices or modular architecture
+- Components shall be loosely coupled and highly cohesive
+- APIs shall use RESTful design principles
+
+NFR-19: Version Control
+- All code shall be managed in Git repository
+- System shall use semantic versioning (MAJOR.MINOR.PATCH)
+- Release branches shall be protected with code review requirements
+
+NFR-20: Deployment
+- System shall support continuous integration/deployment (CI/CD)
+- Deployment shall use containerization (Docker)
+- Environment configurations shall be externalized
+
+3.5.6 Compatibility Requirements
+
+NFR-21: Browser Compatibility (for web dashboard)
+- System shall support Chrome, Firefox, Safari, Edge (latest versions)
+- Web interface shall be responsive for tablets and desktops
+
+NFR-22: Mobile OS Compatibility
+- Android app shall support API level 26 (Android 8.0) and above
+- iOS app shall support iOS 12.0 and above
+- System shall handle OS-specific behaviors and permissions
+
+NFR-23: Network Compatibility
+- Application shall function on 3G, 4G, and Wi-Fi networks
+- System shall optimize data usage for mobile networks
+- Offline mode shall cache essential data locally
+
+================================================================================
+
+3.6 TECHNOLOGIES USED
+
+3.6.1 Frontend Technologies
+
+**React Native (Version 0.76.5):**
+React Native is a popular open-source framework developed by Facebook for building cross-platform mobile applications using JavaScript and React. Key advantages include:
+- Single codebase for both Android and iOS platforms
+- Native performance with JavaScript bridge
+- Large ecosystem of third-party libraries
+- Hot reloading for faster development
+- Strong community support and extensive documentation
+
+**Expo (SDK 52.0.0):**
+Expo is a framework and platform built around React Native that simplifies mobile app development:
+- Managed workflow eliminates complex native configuration
+- Built-in support for camera, location, notifications, and sensors
+- Over-the-air (OTA) updates without app store resubmission
+- Expo Go app for instant testing on physical devices
+- Easy build and deployment process for app stores
+
+**React Navigation:**
+React Navigation provides routing and navigation for React Native applications:
+- Stack, tab, and drawer navigation patterns
+- Type-safe navigation with TypeScript
+- Deep linking support
+- Customizable transitions and animations
+
+**React Native Maps:**
+React Native Maps enables interactive map integration:
+- Support for Google Maps (Android) and Apple Maps (iOS)
+- Custom markers, polylines, and regions
+- Geolocation and geocoding capabilities
+- Real-time location tracking visualization
+
+**Axios:**
+Axios is a promise-based HTTP client for API communication:
+- Clean syntax for making HTTP requests
+- Request and response interceptors
+- Automatic JSON data transformation
+- Error handling and timeout configuration
+
+**TypeScript:**
+TypeScript adds static typing to JavaScript:
+- Compile-time type checking reduces runtime errors
+- Enhanced IDE support with autocomplete
+- Better code maintainability and refactoring
+- Improved collaboration in team environments
+
+3.6.2 Backend Technologies
+
+**FastAPI (Version 0.115.5):**
+FastAPI is a modern, high-performance web framework for building APIs with Python:
+- Automatic API documentation (Swagger UI, ReDoc)
+- Based on standard Python type hints for data validation
+- Async/await support for concurrent operations
+- High performance comparable to Node.js and Go
+- Built-in dependency injection system
+- Automatic request validation using Pydantic
+
+**Uvicorn (Version 0.32.1):**
+Uvicorn is a lightning-fast ASGI server:
+- Asynchronous server gateway interface (ASGI) implementation
+- Supports WebSocket connections
+- HTTP/2 and HTTP/1.1 protocol support
+- Built on uvloop and httptools for maximum performance
+
+**SQLAlchemy (Version 2.0.36):**
+SQLAlchemy is Python's leading SQL toolkit and ORM:
+- Object-Relational Mapping (ORM) for database interactions
+- Support for multiple database backends (SQLite, PostgreSQL, MySQL)
+- Connection pooling and query optimization
+- Migration support through Alembic
+- Type-safe queries with SQLAlchemy 2.0 syntax
+
+**Pydantic (Version 2.10.3):**
+Pydantic provides data validation using Python type annotations:
+- Runtime type checking and validation
+- Automatic JSON serialization/deserialization
+- Custom validators for complex validation logic
+- Integration with FastAPI for request/response validation
+
+**Python JWT (PyJWT):**
+PyJWT implements JSON Web Tokens for authentication:
+- Token generation and verification
+- Expiration and claim validation
+- Support for various signing algorithms (HS256, RS256)
+- Stateless authentication for distributed systems
+
+**Bcrypt:**
+Bcrypt provides secure password hashing:
+- Adaptive hashing with configurable work factor
+- Built-in salt generation
+- Resistant to rainbow table attacks
+- Industry-standard password security
+
+3.6.3 Database Technologies
+
+**SQLite:**
+SQLite is used for development and testing:
+- Serverless, zero-configuration database
+- Single file database storage
+- ACID-compliant transactions
+- Ideal for local development and testing
+
+**PostgreSQL (Production):**
+PostgreSQL is the production database system:
+- Advanced open-source relational database
+- ACID compliance and strong data integrity
+- PostGIS extension for geospatial queries
+- JSON/JSONB support for flexible data storage
+- Excellent performance and scalability
+- Rich ecosystem of tools and extensions
+
+**Redis (Caching Layer):**
+Redis provides in-memory caching:
+- Sub-millisecond response times
+- Session storage and caching
+- Pub/sub messaging for real-time features
+- Reduces database load by 70-80%
+
+3.6.4 Development and Deployment Tools
+
+**Git and GitHub:**
+Version control and collaboration:
+- Distributed version control system
+- Branch-based workflow for feature development
+- Pull request reviews and code collaboration
+- Issue tracking and project management
+
+**Docker:**
+Containerization for consistent environments:
+- Portable application packaging
+- Consistent development and production environments
+- Easy deployment and scaling
+- Docker Compose for multi-container applications
+
+**Pytest:**
+Python testing framework:
+- Simple and scalable test syntax
+- Fixtures for test setup and teardown
+- Comprehensive test coverage reporting
+- Integration with CI/CD pipelines
+
+**ESLint and Prettier:**
+Code quality tools for JavaScript/TypeScript:
+- ESLint enforces coding standards
+- Prettier handles automatic code formatting
+- Consistent code style across team members
+- Integration with VS Code and CI/CD
+
+3.6.5 Third-Party Services
+
+**Google Maps API:**
+Mapping and geolocation services:
+- Interactive map rendering
+- Geocoding and reverse geocoding
+- Directions and routing
+- Places API for location search
+
+**Firebase Cloud Messaging:**
+Push notification delivery:
+- Cross-platform notification service
+- High delivery rates and reliability
+- Topic-based and device-specific targeting
+- Analytics and message tracking
+
+**AWS/Cloud Services:**
+Cloud infrastructure and hosting:
+- EC2 for virtual server hosting
+- RDS for managed database services
+- S3 for file and media storage
+- CloudWatch for monitoring and logging
+- Route 53 for DNS management
+- Certificate Manager for SSL/TLS certificates
+
+3.6.6 Communication Protocols
+
+**HTTP/HTTPS:**
+Standard web communication protocol:
+- RESTful API design principles
+- TLS 1.3 encryption for security
+- Status codes for response handling
+
+**WebSocket:**
+Real-time bidirectional communication:
+- Persistent connection for live updates
+- Lower latency than HTTP polling
+- Efficient for location tracking updates
+
+**JSON:**
+Data interchange format:
+- Lightweight and human-readable
+- Universal support across languages
+- Easy parsing and generation
+
+================================================================================
+
+3.7 TECHNOLOGY STACK JUSTIFICATION
+
+The selection of technologies for TCE EduRide is based on several key criteria: performance, scalability, development efficiency, community support, and cost-effectiveness.
+
+**Frontend Choice - React Native with Expo:**
+React Native was chosen over native development (Swift/Kotlin) and other cross-platform frameworks (Flutter, Xamarin) because:
+- Single codebase reduces development time by 50%
+- Large ecosystem of libraries for maps, notifications, and location services
+- Strong community support and extensive documentation
+- Expo framework accelerates development with managed workflow
+- Over-the-air updates enable rapid bug fixes without app store delays
+
+**Backend Choice - FastAPI:**
+FastAPI was selected over Django, Flask, and Node.js because:
+- Superior performance (20,000+ requests/second)
+- Automatic API documentation reduces development overhead
+- Built-in data validation prevents common errors
+- Modern async/await syntax for concurrent operations
+- Type hints improve code quality and maintainability
+- Easy integration with SQL databases through SQLAlchemy
+
+**Database Choice - PostgreSQL:**
+PostgreSQL was chosen over MySQL, MongoDB, and other databases because:
+- Robust ACID compliance ensures data integrity
+- PostGIS extension provides powerful geospatial capabilities
+- Excellent performance for complex queries
+- Strong community and enterprise support
+- Cost-effective (open-source) with no licensing fees
+- Scalable from small to large deployments
+
+**Authentication Choice - JWT:**
+JWT-based authentication was preferred over session-based authentication because:
+- Stateless architecture simplifies horizontal scaling
+- No server-side session storage required
+- Works seamlessly with mobile applications
+- Industry-standard with broad library support
+- Secure when implemented correctly with HTTPS
+
+================================================================================
+
+3.8 SYSTEM ARCHITECTURE OVERVIEW
+
+The TCE EduRide system follows a three-tier architecture:
+
+**Presentation Layer (Frontend):**
+- React Native mobile applications for students and drivers
+- Web-based admin dashboard (future enhancement)
+- Handles user interactions and data visualization
+
+**Business Logic Layer (Backend):**
+- FastAPI server processing business logic
+- Authentication and authorization
+- Data validation and transformation
+- Real-time data processing
+
+**Data Layer (Database):**
+- PostgreSQL for persistent data storage
+- Redis for caching and session management
+- Structured data models with relationships
+
+This layered architecture ensures separation of concerns, making the system more maintainable, testable, and scalable.
+
+================================================================================
+
+3.9 SUMMARY
+
+This chapter provided comprehensive details on the hardware and software requirements, functional and non-functional specifications, and technologies employed in the TCE EduRide Bus Tracking System. Hardware requirements cover development workstations, mobile devices, server infrastructure, and GPS tracking equipment necessary for system operation.
+
+Software requirements include development tools (IDEs, version control), runtime environments (Python, Node.js), and third-party services (maps, notifications). Functional requirements define 25 core features spanning authentication, student portal, driver portal, and admin portal functionalities. Non-functional requirements establish performance benchmarks, security standards, reliability expectations, and usability guidelines.
+
+The technologies section detailed the chosen tech stack: React Native with Expo for cross-platform mobile development, FastAPI for high-performance backend APIs, PostgreSQL for reliable data storage, and supporting tools for development and deployment. Each technology choice was justified based on performance, scalability, and development efficiency.
+
+These requirements and specifications form the foundation for the system design and implementation phases, ensuring that TCE EduRide meets both technical standards and user expectations. The next chapter will delve into the system design and architecture, presenting detailed diagrams, data models, and architectural patterns that bring these requirements to life.
+
+
