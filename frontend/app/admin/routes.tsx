@@ -123,10 +123,11 @@ export default function RouteManagement() {
               console.error('Delete error:', error);
               const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete route';
               Alert.alert('Error', errorMsg);
-          }
+            }
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   return (

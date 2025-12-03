@@ -170,7 +170,7 @@ export default function StudentManagement() {
           <View key={student.id} style={styles.card}>
             <View style={styles.cardHeader}>
               <View style={styles.studentIcon}>
-                <MaterialCommunityIcons name="account-school" size={32} color="#10b981" />
+                <MaterialCommunityIcons name="account" size={32} color="#10b981" />
               </View>
               <View style={styles.cardInfo}>
                 <Text style={styles.studentName}>{student.name}</Text>
