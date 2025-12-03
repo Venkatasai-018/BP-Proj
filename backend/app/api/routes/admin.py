@@ -149,17 +149,42 @@ async def list_students(db: Session = Depends(get_db)) -> list[StudentResponse]:
 
 
 @router.put("/students/{student_id}", response_model=StudentResponse)
-async def update_student(student_id: int, student: StudentCreate) -> StudentResponse:
+async def update_student(student_id: int, student: StudentCreate, db: Session = Depends(get_db)) -> StudentResponse:
     """Admin updates student information."""
-    # TODO: Update in database
-    return StudentResponse(
-        id=student_id,
+    # Check if student exists
+    existing = crud.get_student_by_id(db, student_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    # Check if email is being changed and already exists for another student
+    if student.email != existing.email:
+        email_exists = crud.get_student_by_email(db, student.email)
+        if email_exists and email_exists.id != student_id:
+            raise HTTPException(status_code=400, detail="Email already in use by another student")
+    
+    # Update student
+    updated_student = crud.update_student(
+        db=db,
+        student_id=student_id,
         name=student.name,
         email=student.email,
         roll_number=student.roll_number,
         phone=student.phone,
         route_id=student.route_id,
-        status="active"
+        password=student.password if student.password else None
+    )
+    
+    if not updated_student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    return StudentResponse(
+        id=updated_student.id,
+        name=updated_student.name,
+        email=updated_student.email,
+        roll_number=updated_student.roll_number,
+        phone=updated_student.phone,
+        route_id=updated_student.route_id,
+        status=updated_student.status
     )
 
 
@@ -239,17 +264,42 @@ async def list_drivers(db: Session = Depends(get_db)) -> list[DriverResponse]:
 
 
 @router.put("/drivers/{driver_id}", response_model=DriverResponse)
-async def update_driver(driver_id: int, driver: DriverCreate) -> DriverResponse:
+async def update_driver(driver_id: int, driver: DriverCreate, db: Session = Depends(get_db)) -> DriverResponse:
     """Admin updates driver information."""
-    # TODO: Update in database
-    return DriverResponse(
-        id=driver_id,
+    # Check if driver exists
+    existing = crud.get_driver_by_id(db, driver_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    # Check if email is being changed and already exists for another driver
+    if driver.email != existing.email:
+        email_exists = crud.get_driver_by_email(db, driver.email)
+        if email_exists and email_exists.id != driver_id:
+            raise HTTPException(status_code=400, detail="Email already in use by another driver")
+    
+    # Update driver
+    updated_driver = crud.update_driver(
+        db=db,
+        driver_id=driver_id,
         name=driver.name,
         email=driver.email,
         phone=driver.phone,
         license_number=driver.license_number,
         bus_id=driver.bus_id,
-        status="active"
+        password=driver.password if driver.password else None
+    )
+    
+    if not updated_driver:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    
+    return DriverResponse(
+        id=updated_driver.id,
+        name=updated_driver.name,
+        email=updated_driver.email,
+        phone=updated_driver.phone,
+        license_number=updated_driver.license_number,
+        bus_id=updated_driver.bus_id,
+        status=updated_driver.status
     )
 
 

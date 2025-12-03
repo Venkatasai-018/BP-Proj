@@ -167,9 +167,6 @@ async def update_route(route_id: int, route: RouteCreate, db: Session = Depends(
 @router.delete("/{route_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_route(route_id: int, db: Session = Depends(get_db)) -> None:
     """Delete a route."""
-    route = crud.get_route(db, route_id)
-    if not route:
+    success = crud.delete_route(db, route_id)
+    if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Route not found")
-    
-    db.delete(route)
-    db.commit()

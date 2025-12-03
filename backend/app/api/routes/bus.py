@@ -88,16 +88,33 @@ async def create_bus(bus: BusCreate, db: Session = Depends(get_db)) -> BusRespon
 
 
 @router.put("/{bus_id}", response_model=BusResponse)
-async def update_bus(bus_id: int, bus_update: BusUpdate) -> BusResponse:
+async def update_bus(bus_id: int, bus: BusCreate, db: Session = Depends(get_db)) -> BusResponse:
     """Update bus information."""
-    # TODO: Update in database
+    # Check if bus exists
+    existing = crud.get_bus(db, bus_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Bus not found")
+    
+    # Update bus
+    updated_bus = crud.update_bus(
+        db=db,
+        bus_id=bus_id,
+        bus_number=bus.bus_number,
+        capacity=bus.capacity,
+        model=bus.model,
+        registration_number=bus.registration_number
+    )
+    
+    if not updated_bus:
+        raise HTTPException(status_code=404, detail="Bus not found")
+    
     return BusResponse(
-        id=bus_id,
-        bus_number="BUS-001",
-        capacity=bus_update.capacity or 50,
-        model=bus_update.model or "Volvo B8R",
-        registration_number="TN-01-AB-1234",
-        status=bus_update.status or "active"
+        id=updated_bus.id,
+        bus_number=updated_bus.bus_number,
+        capacity=updated_bus.capacity,
+        model=updated_bus.model,
+        registration_number=updated_bus.registration_number,
+        status=updated_bus.status
     )
 
 

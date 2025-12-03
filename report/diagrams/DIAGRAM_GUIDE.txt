@@ -1,0 +1,534 @@
+TCE EDURIDE BUS TRACKING SYSTEM
+FLOW DIAGRAMS AND SYSTEM DIAGRAMS
+================================================================================
+
+This document contains a comprehensive collection of all flow diagrams and 
+system diagrams for the TCE EduRide Bus Tracking System project.
+
+All diagrams are high-resolution (300 DPI) PNG images, suitable for printing 
+and insertion into project reports, presentations, and documentation.
+
+Location: c:\Users\Venkatasai.Kommu\BP-Proj\report\diagrams\
+
+================================================================================
+
+DIAGRAM LISTING
+================================================================================
+
+1. USER AUTHENTICATION FLOW DIAGRAM
+   File: 1_authentication_flow.png
+   Type: Process Flow Diagram
+   
+   Description:
+   This diagram illustrates the complete user authentication process for the
+   TCE EduRide system. It shows the step-by-step flow from when a user opens
+   the application through role selection (Admin/Student/Driver), credential
+   entry, backend validation using JWT tokens, and finally navigation to the
+   role-specific dashboard.
+   
+   Key Components:
+   - User role selection interface
+   - Credential input and validation
+   - Backend JWT token generation
+   - Error handling for invalid credentials
+   - Successful login flow to dashboard
+   - Token storage in local device
+   
+   Use in Report:
+   Include in Chapter 4 (System Design) or Chapter 5 (Implementation) to 
+   demonstrate the authentication mechanism and security implementation.
+
+--------------------------------------------------------------------------------
+
+2. REAL-TIME BUS TRACKING FLOW DIAGRAM
+   File: 2_bus_tracking_flow.png
+   Type: Process Flow Diagram (Three-column layout)
+   
+   Description:
+   This comprehensive diagram shows the real-time GPS tracking workflow from
+   three perspectives: Student App, Backend API, and Driver App. It demonstrates
+   how location data flows through the system, from the driver's GPS updates
+   to the student's real-time bus location display.
+   
+   Key Components:
+   STUDENT APP COLUMN:
+   - Opening dashboard and viewing assigned bus
+   - Requesting live location from backend
+   - Displaying bus location on interactive map
+   - Showing estimated time of arrival (ETA)
+   - Auto-refresh loop (10-30 seconds)
+   
+   BACKEND API COLUMN:
+   - JWT token verification for security
+   - Querying latest bus location from database
+   - Calculating ETA using Haversine algorithm
+   - Returning location data with timestamp
+   
+   DRIVER APP COLUMN:
+   - Starting trip and enabling GPS tracking
+   - Capturing GPS coordinates continuously
+   - Sending location updates every 10 seconds
+   - Trip active loop with decision diamond
+   - End trip functionality
+   
+   Use in Report:
+   Essential for Chapter 5 (Implementation) to explain the core tracking feature.
+   Also valuable in Chapter 3 (Requirements) to show functional requirements.
+
+--------------------------------------------------------------------------------
+
+3. SCHEDULE MANAGEMENT FLOW DIAGRAM
+   File: 3_schedule_management_flow.png
+   Type: Process Flow Diagram
+   
+   Description:
+   This diagram depicts the admin schedule management process, showing both
+   create and edit workflows. It demonstrates how administrators can add new
+   schedules or modify existing ones, with backend validation ensuring data
+   integrity.
+   
+   Key Components:
+   CREATE PATH (Left Branch):
+   - Click add schedule button
+   - Select bus from available fleet
+   - Select route for the schedule
+   - Set departure/arrival timing
+   - Set active days (weekdays/weekends)
+   
+   EDIT PATH (Right Branch):
+   - Select existing schedule item
+   - Modify schedule fields
+   - Update changes to backend
+   
+   COMMON PATH:
+   - Submit schedule data to backend
+   - Backend validation of data integrity
+   - Database storage on successful validation
+   - Error display for invalid data
+   - Success confirmation and list refresh
+   
+   Use in Report:
+   Include in Chapter 5 (Implementation) to demonstrate CRUD operations and
+   admin functionality. Shows form validation and error handling patterns.
+
+--------------------------------------------------------------------------------
+
+4. FEEDBACK SUBMISSION FLOW DIAGRAM
+   File: 4_feedback_flow.png
+   Type: Process Flow Diagram with Side Panel
+   
+   Description:
+   This diagram illustrates the complete feedback submission process, from
+   user login through feedback submission to admin review. It shows how the
+   system facilitates communication between users and administrators.
+   
+   Key Components:
+   MAIN FLOW:
+   - User authentication and login
+   - Navigation to feedback section
+   - Category selection (Service/Driver/Route/Other)
+   - Star rating input (1-5 stars)
+   - Text comment entry
+   - Form submission to backend
+   - Backend processing and database storage
+   - Admin notification trigger
+   - Success message display
+   
+   ADMIN REVIEW PANEL (Side):
+   - Admin feedback list view
+   - Review and response functionality
+   - Action taking based on feedback
+   
+   Use in Report:
+   Useful for Chapter 5 (Implementation) to show user interaction features.
+   Demonstrates the communication channel between stakeholders.
+
+--------------------------------------------------------------------------------
+
+5. SYSTEM ARCHITECTURE DIAGRAM
+   File: 5_system_architecture.png
+   Type: Architecture Diagram (Three-tier)
+   
+   Description:
+   This comprehensive architecture diagram shows the complete three-tier
+   system architecture of TCE EduRide, illustrating how the presentation,
+   business logic, and data layers interact.
+   
+   Key Components:
+   PRESENTATION LAYER (Top):
+   - Student Mobile App (React Native)
+   - Driver Mobile App (React Native)
+   - Admin Mobile App (React Native)
+   - Cross-platform compatibility for Android/iOS
+   
+   BUSINESS LOGIC LAYER (Middle):
+   - FastAPI Backend (Python 3.9+)
+   - REST API endpoints
+   - Component modules:
+     * Authentication service
+     * Bus tracking service
+     * Schedule management service
+     * Route management service
+     * Feedback service
+   
+   DATA LAYER (Bottom):
+   - PostgreSQL Database (cylinder representation)
+   - Relational data storage
+   - ACID compliance
+   
+   EXTERNAL SERVICES (Sides):
+   - GPS Service (Google Maps integration)
+   - JWT Authentication service
+   
+   Use in Report:
+   Critical for Chapter 4 (System Design and Architecture). This should be
+   one of the first diagrams in the design chapter to give readers an
+   overview of the system structure.
+
+--------------------------------------------------------------------------------
+
+6. DATABASE SCHEMA DIAGRAM
+   File: 6_database_schema.png
+   Type: Entity-Relationship Diagram (ERD)
+   
+   Description:
+   This diagram presents the complete database schema showing all entities,
+   their attributes, primary keys (PK), foreign keys (FK), and relationships
+   between tables. It visualizes the relational database structure.
+   
+   Key Entities and Attributes:
+   
+   ADMIN TABLE:
+   - id (PK)
+   - username
+   - password_hash
+   - email
+   - phone
+   
+   STUDENT TABLE:
+   - id (PK)
+   - roll_number
+   - name
+   - email
+   - phone
+   - route_id (FK → Route)
+   
+   DRIVER TABLE:
+   - id (PK)
+   - name
+   - license_no
+   - phone
+   - email
+   
+   BUS TABLE:
+   - id (PK)
+   - bus_number
+   - capacity
+   - route_id (FK → Route)
+   - driver_id (FK → Driver)
+   
+   ROUTE TABLE:
+   - id (PK)
+   - name
+   - route_number
+   - start_location
+   - end_location
+   
+   SCHEDULE TABLE:
+   - id (PK)
+   - bus_id (FK → Bus)
+   - route_id (FK → Route)
+   - start_time
+   - end_time
+   
+   FEEDBACK TABLE:
+   - id (PK)
+   - user_id (FK)
+   - category
+   - rating
+   - comment
+   
+   BUSLOCATION TABLE:
+   - id (PK)
+   - bus_id (FK → Bus)
+   - latitude
+   - longitude
+   - timestamp
+   
+   ROUTESTOP TABLE:
+   - id (PK)
+   - route_id (FK → Route)
+   - stop_name
+   - latitude
+   - longitude
+   
+   Relationships:
+   - Route → Student (1:N) - One route has many students
+   - Route → Bus (1:N) - One route can have multiple buses
+   - Driver → Bus (1:N) - One driver can drive multiple buses
+   - Bus → Schedule (1:N) - One bus has multiple schedules
+   - Route → Schedule (1:N) - One route has multiple schedules
+   - Bus → BusLocation (1:N) - One bus has multiple location records
+   - Route → RouteStop (1:N) - One route has multiple stops
+   
+   Use in Report:
+   Essential for Chapter 3 (Requirements) or Chapter 4 (System Design) to
+   show database design. Demonstrates normalization and data integrity
+   through foreign key relationships.
+
+--------------------------------------------------------------------------------
+
+7. USE CASE DIAGRAM
+   File: 7_use_case_diagram.png
+   Type: UML Use Case Diagram
+   
+   Description:
+   This UML use case diagram shows all actors (users) and their interactions
+   with the TCE EduRide system. It provides a high-level view of system
+   functionality from the user perspective.
+   
+   Actors:
+   
+   STUDENT (Left side - Blue):
+   - View Bus Location
+   - View Schedule
+   - Submit Feedback
+   
+   DRIVER (Left side - Green):
+   - Update GPS Location
+   - View Route
+   - Start/End Trip
+   
+   ADMIN (Right side - Yellow):
+   - Manage Buses
+   - Manage Routes
+   - Manage Schedules
+   - Manage Students
+   - View Feedback
+   - View Reports
+   
+   System Boundary:
+   Dashed rectangle labeled "TCE EduRide System" encompasses all use cases,
+   showing the system's scope and boundaries.
+   
+   Connections:
+   Solid lines connect actors to their respective use cases, indicating
+   which users can perform which actions.
+   
+   Use in Report:
+   Perfect for Chapter 2 (Literature Survey) or Chapter 3 (Requirements) to
+   introduce system functionality. Helps readers understand user roles and
+   system capabilities at a glance.
+
+--------------------------------------------------------------------------------
+
+8. DEPLOYMENT DIAGRAM
+   File: 8_deployment_diagram.png
+   Type: UML Deployment Diagram
+   
+   Description:
+   This deployment diagram shows the physical architecture of the TCE EduRide
+   system, illustrating how software components are deployed across hardware
+   nodes and how they communicate.
+   
+   Key Components:
+   
+   CLIENT DEVICES (Top Layer):
+   - 📱 Android Device (React Native App)
+   - 📱 iOS Device (React Native App)
+   - 💻 Tablet/iPad (React Native App)
+   All communicate via HTTPS
+   
+   INTERNET (Middle):
+   - Cloud symbol representing internet connectivity
+   - HTTPS protocol for secure communication
+   
+   CLOUD SERVER (Server Layer):
+   - 🖥️ Application Server
+     * FastAPI framework
+     * Uvicorn ASGI server
+     * Python 3.9+ runtime
+   
+   DATABASE (Bottom Layer):
+   - 🗄️ PostgreSQL Database Server
+   - Persistent data storage
+   - Direct connection to application server
+   
+   EXTERNAL SERVICES (Sides):
+   - 🌐 GPS Service (Google Maps API)
+   - 🔐 Auth Service (JWT Token generation)
+   
+   Communication Protocols:
+   - HTTPS for all client-server communication
+   - Database connection for server-database
+   - API calls to external services
+   
+   Use in Report:
+   Include in Chapter 4 (System Design) or Chapter 8 (Conclusion) to show
+   deployment architecture. Demonstrates cloud-based deployment strategy
+   and system scalability.
+
+================================================================================
+
+DIAGRAM USAGE GUIDE
+================================================================================
+
+RECOMMENDED PLACEMENT IN PROJECT REPORT:
+
+Chapter 1 - Introduction:
+- None (text-only introduction)
+
+Chapter 2 - Literature Survey:
+- Diagram 7: Use Case Diagram (to introduce system scope)
+
+Chapter 3 - Requirements and Specifications:
+- Diagram 6: Database Schema Diagram (data requirements)
+- Diagram 7: Use Case Diagram (functional requirements overview)
+
+Chapter 4 - System Design and Architecture:
+- Diagram 5: System Architecture (three-tier architecture)
+- Diagram 8: Deployment Diagram (deployment architecture)
+- Diagram 6: Database Schema Diagram (database design)
+
+Chapter 5 - Implementation:
+- Diagram 1: User Authentication Flow
+- Diagram 2: Real-Time Bus Tracking Flow
+- Diagram 3: Schedule Management Flow
+- Diagram 4: Feedback Submission Flow
+
+Chapter 6 - System Testing:
+- Reference diagrams from Chapter 5 to show tested flows
+
+Chapter 7 - Results and Discussion:
+- Can reference any diagram to support discussion points
+
+Chapter 8 - Conclusion and Future Work:
+- Diagram 5: System Architecture (for future work discussion)
+
+================================================================================
+
+INSERTION INSTRUCTIONS FOR MICROSOFT WORD:
+
+1. Open your Word document
+2. Position cursor where you want to insert the diagram
+3. Go to Insert → Pictures → This Device
+4. Navigate to: c:\Users\Venkatasai.Kommu\BP-Proj\report\diagrams\
+5. Select the desired diagram file
+6. Click Insert
+7. Resize if needed (recommended: 6-7 inches width)
+8. Add caption: Right-click → Insert Caption
+   Format: "Figure X.X: [Diagram Name]"
+9. Center-align the image
+10. Add descriptive text below the figure
+
+Example Caption Format:
+Figure 4.1: System Architecture showing three-tier design with React Native 
+frontend, FastAPI backend, and PostgreSQL database.
+
+================================================================================
+
+DIAGRAM SPECIFICATIONS:
+
+Resolution: 300 DPI (print quality)
+Format: PNG (with transparency where applicable)
+Color Mode: RGB
+File Size: 100-500 KB per diagram
+Dimensions: Varies (optimized for readability)
+Font: Sans-serif (default matplotlib font)
+Color Scheme: Professional corporate colors
+- Blue (#2196F3) - Process steps
+- Green (#4CAF50) - Start/End points
+- Yellow (#FFC107) - Decision points
+- Red (#F44336) - Database/Errors
+- Purple (#9C27B0) - Input/Output
+- Orange (#FFAB91) - API/Backend
+- Light Blue (#90CAF9) - Student features
+- Light Green (#A5D6A7) - Driver features
+- Light Yellow (#FFE082) - Admin features
+
+================================================================================
+
+QUALITY ASSURANCE CHECKLIST:
+
+✓ All 8 diagrams generated successfully
+✓ High resolution (300 DPI) for print quality
+✓ Professional color scheme applied
+✓ Clear labels and text (10pt font minimum)
+✓ Shadow effects for depth perception
+✓ Consistent styling across all diagrams
+✓ Logical flow direction (top to bottom, left to right)
+✓ Decision points clearly marked with diamonds
+✓ Database represented with cylinder shapes
+✓ Actors/entities clearly distinguished
+✓ Arrows indicate direction of flow/communication
+✓ All diagram types represented (flow, architecture, ERD, use case, deployment)
+
+================================================================================
+
+ADDITIONAL NOTES:
+
+1. Diagrams are vector-based where possible for scalability
+2. PNG format chosen for universal compatibility with Word, PowerPoint, etc.
+3. Shadow effects add professional appearance and depth
+4. Color-coding helps distinguish between different types of components
+5. All diagrams use consistent styling for cohesive visual presentation
+6. Emojis in Deployment Diagram provide visual interest (may show as boxes if
+   fonts don't support Unicode, but diagrams are still readable)
+
+================================================================================
+
+TROUBLESHOOTING:
+
+If diagrams appear blurry in Word:
+1. Right-click image → Format Picture
+2. Picture tab → Compression
+3. Uncheck "Compress images in file"
+4. Select "Best quality for printing (220 ppi)"
+
+If colors don't match when printed:
+- Ensure printer is set to "Color" mode
+- Use "Best Quality" print setting
+- Consider RGB to CMYK conversion for professional printing
+
+If diagrams are too large:
+- Resize proportionally (hold Shift while dragging corners)
+- Recommended width: 6-7 inches for portrait orientation
+- Recommended width: 9-10 inches for landscape orientation
+
+================================================================================
+
+PROJECT INFORMATION:
+
+Project Name: TCE EduRide Bus Tracking System
+Technology Stack: React Native, FastAPI, PostgreSQL
+Architecture: Three-tier (Presentation, Business Logic, Data)
+Target Platform: Android, iOS (Mobile)
+Database: PostgreSQL (Relational)
+API: RESTful API with FastAPI
+Authentication: JWT (JSON Web Tokens)
+GPS Service: Google Maps API
+
+================================================================================
+
+CONTACT AND SUPPORT:
+
+For questions about diagram usage or modifications, refer to:
+- Python script: generate_diagrams.py (in same directory)
+- Matplotlib documentation: https://matplotlib.org
+- Project README files in backend/ and frontend/ directories
+
+To regenerate diagrams:
+1. Open PowerShell in the diagrams directory
+2. Run: C:/Users/Venkatasai.Kommu/BP-Proj/backend/.venv/Scripts/python.exe generate_diagrams.py
+3. Wait for "ALL DIAGRAMS GENERATED SUCCESSFULLY!" message
+4. Diagrams will be overwritten with new versions
+
+To modify diagrams:
+1. Edit generate_diagrams.py
+2. Locate the specific diagram function (e.g., generate_auth_flow)
+3. Modify coordinates, colors, or text as needed
+4. Re-run the script to generate updated diagrams
+
+================================================================================
+
+END OF DOCUMENTATION

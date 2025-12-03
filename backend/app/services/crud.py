@@ -51,6 +51,34 @@ def create_student(db: Session, name: str, email: str, roll_number: str,
     return student
 
 
+def get_student_by_id(db: Session, student_id: int) -> Optional[Student]:
+    """Get student by ID."""
+    return db.query(Student).filter(Student.id == student_id).first()
+
+
+def update_student(db: Session, student_id: int, name: str, email: str, 
+                   roll_number: str, phone: str, route_id: Optional[int] = None,
+                   password: Optional[str] = None) -> Optional[Student]:
+    """Update a student."""
+    student = db.query(Student).filter(Student.id == student_id).first()
+    if not student:
+        return None
+    
+    student.name = name
+    student.email = email
+    student.roll_number = roll_number
+    student.phone = phone
+    student.route_id = route_id
+    
+    # Only update password if provided
+    if password:
+        student.password = get_password_hash(password)
+    
+    db.commit()
+    db.refresh(student)
+    return student
+
+
 def delete_student(db: Session, student_id: int) -> bool:
     """Delete a student."""
     student = db.query(Student).filter(Student.id == student_id).first()
@@ -85,6 +113,34 @@ def create_driver(db: Session, name: str, email: str, phone: str,
         bus_id=bus_id
     )
     db.add(driver)
+    db.commit()
+    db.refresh(driver)
+    return driver
+
+
+def get_driver_by_id(db: Session, driver_id: int) -> Optional[Driver]:
+    """Get driver by ID."""
+    return db.query(Driver).filter(Driver.id == driver_id).first()
+
+
+def update_driver(db: Session, driver_id: int, name: str, email: str, 
+                  phone: str, license_number: str, bus_id: Optional[int] = None,
+                  password: Optional[str] = None) -> Optional[Driver]:
+    """Update a driver."""
+    driver = db.query(Driver).filter(Driver.id == driver_id).first()
+    if not driver:
+        return None
+    
+    driver.name = name
+    driver.email = email
+    driver.phone = phone
+    driver.license_number = license_number
+    driver.bus_id = bus_id
+    
+    # Only update password if provided
+    if password:
+        driver.password = get_password_hash(password)
+    
     db.commit()
     db.refresh(driver)
     return driver
@@ -126,17 +182,58 @@ def create_bus(db: Session, bus_number: str, capacity: int,
     return bus
 
 
+def update_bus(db: Session, bus_id: int, bus_number: str, capacity: int,
+               model: str, registration_number: str) -> Optional[Bus]:
+    """Update a bus."""
+    bus = db.query(Bus).filter(Bus.id == bus_id).first()
+    if not bus:
+        return None
+    
+    bus.bus_number = bus_number
+    bus.capacity = capacity
+    bus.model = model
+    bus.registration_number = registration_number
+    
+    db.commit()
+    db.refresh(bus)
+    return bus
+
+
 def delete_bus(db: Session, bus_id: int) -> bool:
     """Delete a bus."""
     bus = db.query(Bus).filter(Bus.id == bus_id).first()
     if bus:
-        db.delete(bus)
+def create_route(db: Session, route_name: str, description: str) -> Route:
+    """Create a new route."""
+    route = Route(route_name=route_name, description=description)
+    db.add(route)
+    db.commit()
+    db.refresh(route)
+    return route
+
+
+def update_route(db: Session, route_id: int, route_name: str, description: str) -> Optional[Route]:
+    """Update a route."""
+    route = db.query(Route).filter(Route.id == route_id).first()
+    if not route:
+        return None
+    
+    route.route_name = route_name
+    route.description = description
+    
+    db.commit()
+    db.refresh(route)
+    return route
+
+
+def delete_route(db: Session, route_id: int) -> bool:
+    """Delete a route."""
+    route = db.query(Route).filter(Route.id == route_id).first()
+    if route:
+        db.delete(route)
         db.commit()
         return True
     return False
-
-
-# Route CRUD
 def get_routes(db: Session, skip: int = 0, limit: int = 100):
     """Get all routes."""
     return db.query(Route).offset(skip).limit(limit).all()
@@ -154,19 +251,51 @@ def create_route(db: Session, route_name: str, description: str) -> Route:
     db.commit()
     db.refresh(route)
     return route
+def get_schedule_by_id(db: Session, schedule_id: int) -> Optional[Schedule]:
+    """Get schedule by ID."""
+    return db.query(Schedule).filter(Schedule.id == schedule_id).first()
 
 
-def create_route_stop(db: Session, route_id: int, stop_name: str, 
-                      latitude: float, longitude: float, order: int) -> RouteStop:
-    """Create a route stop."""
-    stop = RouteStop(
+def create_schedule(db: Session, bus_id: int, route_id: int, 
+                    departure_time: str, days_of_week: str) -> Schedule:
+    """Create a new schedule."""
+    schedule = Schedule(
+        bus_id=bus_id,
         route_id=route_id,
-        stop_name=stop_name,
-        latitude=latitude,
-        longitude=longitude,
-        order=order
+        departure_time=departure_time,
+        days_of_week=days_of_week
     )
-    db.add(stop)
+    db.add(schedule)
+    db.commit()
+    db.refresh(schedule)
+    return schedule
+
+
+def update_schedule(db: Session, schedule_id: int, bus_id: int, route_id: int,
+                    departure_time: str, days_of_week: str) -> Optional[Schedule]:
+    """Update a schedule."""
+    schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
+    if not schedule:
+        return None
+    
+    schedule.bus_id = bus_id
+    schedule.route_id = route_id
+    schedule.departure_time = departure_time
+    schedule.days_of_week = days_of_week
+    
+    db.commit()
+    db.refresh(schedule)
+    return schedule
+
+
+def delete_schedule(db: Session, schedule_id: int) -> bool:
+    """Delete a schedule."""
+    schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
+    if schedule:
+        db.delete(schedule)
+        db.commit()
+        return True
+    return False
     db.commit()
     db.refresh(stop)
     return stop
