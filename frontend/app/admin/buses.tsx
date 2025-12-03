@@ -99,8 +99,10 @@ export default function BusManagement() {
             await busService.deleteBus(id);
             Alert.alert('Success', 'Bus deleted successfully');
             loadBuses();
-          } catch (error) {
-            Alert.alert('Error', 'Failed to delete bus');
+          } catch (error: any) {
+            console.error('Delete error:', error);
+            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete bus';
+            Alert.alert('Error', errorMsg);
           }
         },
       },

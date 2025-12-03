@@ -97,8 +97,10 @@ export default function ScheduleManagement() {
             await scheduleService.deleteSchedule(id);
             Alert.alert('Success', 'Schedule deleted successfully');
             loadSchedules();
-          } catch (error) {
-            Alert.alert('Error', 'Failed to delete schedule');
+          } catch (error: any) {
+            console.error('Delete error:', error);
+            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete schedule';
+            Alert.alert('Error', errorMsg);
           }
         },
       },

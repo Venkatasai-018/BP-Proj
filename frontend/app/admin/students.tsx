@@ -108,8 +108,10 @@ export default function StudentManagement() {
             await adminService.deleteStudent(id);
             Alert.alert('Success', 'Student deleted successfully');
             loadStudents();
-          } catch (error) {
-            Alert.alert('Error', 'Failed to delete student');
+          } catch (error: any) {
+            console.error('Delete error:', error);
+            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete student';
+            Alert.alert('Error', errorMsg);
           }
         },
       },

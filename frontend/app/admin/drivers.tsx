@@ -108,8 +108,10 @@ export default function DriverManagement() {
             await adminService.deleteDriver(id);
             Alert.alert('Success', 'Driver deleted successfully');
             loadDrivers();
-          } catch (error) {
-            Alert.alert('Error', 'Failed to delete driver');
+          } catch (error: any) {
+            console.error('Delete error:', error);
+            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete driver';
+            Alert.alert('Error', errorMsg);
           }
         },
       },
