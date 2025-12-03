@@ -29,10 +29,11 @@ class BusResponse(BaseModel):
 
 class BusUpdate(BaseModel):
     """Schema for updating bus information."""
-    bus_number: str
-    capacity: int
-    model: str
-    registration_number: str
+    bus_number: str | None = None
+    capacity: int | None = None
+    model: str | None = None
+    registration_number: str | None = None
+    status: str | None = None
 
 
 @router.get("/", response_model=list[BusResponse])
@@ -96,15 +97,21 @@ async def update_bus(bus_id: int, bus: BusUpdate, db: Session = Depends(get_db))
     if not existing:
         raise HTTPException(status_code=404, detail="Bus not found")
     
+    # Use existing values if not provided
+    bus_number = bus.bus_number if bus.bus_number is not None else existing.bus_number
+    capacity = bus.capacity if bus.capacity is not None else existing.capacity
+    model = bus.model if bus.model is not None else existing.model
+    registration_number = bus.registration_number if bus.registration_number is not None else existing.registration_number
+    
     # Check if bus_number is being changed and already exists
-    if bus.bus_number != existing.bus_number:
-        bus_exists = crud.get_bus_by_number(db, bus.bus_number)
+    if bus_number != existing.bus_number:
+        bus_exists = crud.get_bus_by_number(db, bus_number)
         if bus_exists and bus_exists.id != bus_id:
             raise HTTPException(status_code=400, detail="Bus number already exists")
     
     # Check if registration_number is being changed and already exists
-    if bus.registration_number != existing.registration_number:
-        reg_exists = crud.get_bus_by_registration(db, bus.registration_number)
+    if registration_number != existing.registration_number:
+        reg_exists = crud.get_bus_by_registration(db, registration_number)
         if reg_exists and reg_exists.id != bus_id:
             raise HTTPException(status_code=400, detail="Registration number already exists")
     
@@ -112,10 +119,10 @@ async def update_bus(bus_id: int, bus: BusUpdate, db: Session = Depends(get_db))
     updated_bus = crud.update_bus(
         db=db,
         bus_id=bus_id,
-        bus_number=bus.bus_number,
-        capacity=bus.capacity,
-        model=bus.model,
-        registration_number=bus.registration_number
+        bus_number=bus_number,
+        capacity=capacity,
+        model=model,
+        registration_number=registration_number
     )
     
     if not updated_bus:
