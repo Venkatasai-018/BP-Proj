@@ -151,6 +151,13 @@ async def update_route(route_id: int, route: RouteCreate, db: Session = Depends(
     for stop in route.stops:
         crud.create_route_stop(
             db,
+            route_id=updated_route.id,
+            stop_name=stop.stop_name,
+            latitude=stop.latitude,
+            longitude=stop.longitude,
+            order=stop.order
+        )
+    
     db.commit()
     db.refresh(updated_route)
     
@@ -168,13 +175,6 @@ async def update_route(route_id: int, route: RouteCreate, db: Session = Depends(
             for stop in updated_route.stops
         ],
         status=updated_route.status
-    )           latitude=stop.latitude,
-                longitude=stop.longitude,
-                order=stop.order
-            )
-            for stop in db_route.stops
-        ],
-        status=db_route.status
     )
 
 
