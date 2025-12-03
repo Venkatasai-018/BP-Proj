@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   Modal,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -98,24 +99,57 @@ export default function StudentManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    Alert.alert('Confirm Delete', 'Are you sure you want to delete this student?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await adminService.deleteStudent(id);
-            Alert.alert('Success', 'Student deleted successfully');
-            loadStudents();
-          } catch (error: any) {
-            console.error('Delete error:', error);
-            const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete student';
-            Alert.alert('Error', errorMsg);
-          }
-        },
-      },
-    ]);
+    console.log('Delete clicked for student ID:', id);
+    
+    if (Platform.OS === 'web') {
+      // For web, use window.confirm
+      const confirmed = window.confirm('Are you sure you want to delete this student?');
+      if (!confirmed) {
+        console.log('Delete cancelled');
+        return;
+      }
+      
+      console.log('Delete confirmed, calling API...');
+      try {
+        await adminService.deleteStudent(id);
+        console.log('Delete successful');
+        alert('Student deleted successfully');
+        loadStudents();
+      } catch (error: any) {
+        console.error('Delete error:', error);
+        console.error('Error response:', error.response);
+        const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete student';
+        alert(`Error: ${errorMsg}`);
+      }
+    } else {
+      // For mobile, use Alert
+      Alert.alert(
+        'Confirm Delete',
+        'Are you sure you want to delete this student?',
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => console.log('Delete cancelled') },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              console.log('Delete confirmed, calling API...');
+              try {
+                await adminService.deleteStudent(id);
+                console.log('Delete successful');
+                Alert.alert('Success', 'Student deleted successfully');
+                loadStudents();
+              } catch (error: any) {
+                console.error('Delete error:', error);
+                console.error('Error response:', error.response);
+                const errorMsg = error.response?.data?.detail || error.message || 'Failed to delete student';
+                Alert.alert('Error', errorMsg);
+              }
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   return (
