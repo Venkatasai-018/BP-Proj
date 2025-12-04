@@ -236,6 +236,11 @@ def delete_bus(db: Session, bus_id: int) -> bool:
     return False
 
 
+def get_route(db: Session, route_id: int) -> Optional[Route]:
+    """Get a route by ID."""
+    return db.query(Route).filter(Route.id == route_id).first()
+
+
 def create_route(db: Session, route_name: str, description: str) -> Route:
     """Create a new route."""
     route = Route(route_name=route_name, description=description)
@@ -243,6 +248,21 @@ def create_route(db: Session, route_name: str, description: str) -> Route:
     db.commit()
     db.refresh(route)
     return route
+
+
+def create_route_stop(db: Session, route_id: int, stop_name: str, latitude: float, longitude: float, order: int) -> RouteStop:
+    """Create a route stop."""
+    route_stop = RouteStop(
+        route_id=route_id,
+        stop_name=stop_name,
+        latitude=latitude,
+        longitude=longitude,
+        order=order
+    )
+    db.add(route_stop)
+    db.commit()
+    db.refresh(route_stop)
+    return route_stop
 
 
 def update_route(db: Session, route_id: int, route_name: str, description: str) -> Optional[Route]:
@@ -274,23 +294,14 @@ def delete_route(db: Session, route_id: int) -> bool:
         db.commit()
         return True
     return False
+
+
 def get_routes(db: Session, skip: int = 0, limit: int = 100):
     """Get all routes."""
     return db.query(Route).offset(skip).limit(limit).all()
 
 
-def get_route(db: Session, route_id: int) -> Optional[Route]:
-    """Get route by ID."""
-    return db.query(Route).filter(Route.id == route_id).first()
-
-
-def create_route(db: Session, route_name: str, description: str) -> Route:
-    """Create a new route."""
-    route = Route(route_name=route_name, description=description)
-    db.add(route)
-    db.commit()
-    db.refresh(route)
-    return route
+# Schedule CRUD
 def get_schedule_by_id(db: Session, schedule_id: int) -> Optional[Schedule]:
     """Get schedule by ID."""
     return db.query(Schedule).filter(Schedule.id == schedule_id).first()

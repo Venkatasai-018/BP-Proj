@@ -48,6 +48,7 @@ export default function RouteManagement() {
   }, []);
 
   const handleCreate = async () => {
+    console.log('Create/Update clicked');
     if (!formData.route_name || !formData.description) {
       Alert.alert('Error', 'Please fill all fields');
       return;
@@ -58,13 +59,26 @@ export default function RouteManagement() {
       return;
     }
 
+    console.log('Sending route data:', formData);
     try {
       if (editingRoute) {
+        console.log('Updating route:', editingRoute.id);
         await routeService.updateRoute(editingRoute.id, formData);
-        Alert.alert('Success', 'Route updated successfully');
+        console.log('Route updated successfully');
+        if (Platform.OS === 'web') {
+          alert('Route updated successfully');
+        } else {
+          Alert.alert('Success', 'Route updated successfully');
+        }
       } else {
+        console.log('Creating new route');
         await routeService.createRoute(formData);
-        Alert.alert('Success', 'Route created successfully');
+        console.log('Route created successfully');
+        if (Platform.OS === 'web') {
+          alert('Route created successfully');
+        } else {
+          Alert.alert('Success', 'Route created successfully');
+        }
       }
       setModalVisible(false);
       setEditingRoute(null);
@@ -72,7 +86,14 @@ export default function RouteManagement() {
       setStopForm({ stop_name: '', latitude: '', longitude: '' });
       loadRoutes();
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || `Failed to ${editingRoute ? 'update' : 'create'} route`);
+      console.error('Create/Update error:', error);
+      console.error('Error response:', error.response);
+      const errorMsg = error.response?.data?.detail || `Failed to ${editingRoute ? 'update' : 'create'} route`;
+      if (Platform.OS === 'web') {
+        alert(`Error: ${errorMsg}`);
+      } else {
+        Alert.alert('Error', errorMsg);
+      }
     }
   };
 
