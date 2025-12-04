@@ -357,21 +357,6 @@ def get_schedules(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Schedule).offset(skip).limit(limit).all()
 
 
-def create_schedule(db: Session, bus_id: int, route_id: int, 
-                    departure_time: str, days_of_week: str) -> Schedule:
-    """Create a new schedule."""
-    schedule = Schedule(
-        bus_id=bus_id,
-        route_id=route_id,
-        departure_time=departure_time,
-        days_of_week=days_of_week
-    )
-    db.add(schedule)
-    db.commit()
-    db.refresh(schedule)
-    return schedule
-
-
 # Feedback CRUD
 def get_feedbacks(db: Session, skip: int = 0, limit: int = 100):
     """Get all feedbacks."""

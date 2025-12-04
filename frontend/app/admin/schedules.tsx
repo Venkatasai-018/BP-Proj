@@ -24,16 +24,27 @@ export default function ScheduleManagement() {
     route_id: '',
     bus_id: '',
     departure_time: '',
-    arrival_time: '',
+    days_of_week: [] as string[],
   });
 
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
   const loadSchedules = async () => {
+    console.log('Loading schedules...');
     setLoading(true);
     try {
       const data = await scheduleService.getSchedules();
+      console.log('Schedules loaded:', data);
       setSchedules(data);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load schedules');
+    } catch (error: any) {
+      console.error('Load schedules error:', error);
+      console.error('Error response:', error.response);
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to load schedules';
+      if (Platform.OS === 'web') {
+        alert(`Error: ${errorMsg}`);
+      } else {
+        Alert.alert('Error', errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -44,45 +55,75 @@ export default function ScheduleManagement() {
   }, []);
 
   const handleCreate = async () => {
-    if (!formData.route_id || !formData.bus_id || !formData.departure_time || !formData.arrival_time) {
-      Alert.alert('Error', 'Please fill all fields');
+    if (!formData.route_id || !formData.bus_id || !formData.departure_time) {
+      if (Platform.OS === 'web') {
+        alert('Please fill all required fields');
+      } else {
+        Alert.alert('Error', 'Please fill all required fields');
+      }
       return;
     }
 
-    try {
-      if (editingSchedule) {
-        await scheduleService.updateSchedule(editingSchedule.id, {
-          route_id: parseInt(formData.route_id),
-          bus_id: parseInt(formData.bus_id),
-          departure_time: formData.departure_time,
-          arrival_time: formData.arrival_time,
-        });
-        Alert.alert('Success', 'Schedule updated successfully');
+    if (formData.days_of_week.length === 0) {
+      if (Platform.OS === 'web') {
+        alert('Please select at least one day');
       } else {
-        await scheduleService.createSchedule({
-          route_id: parseInt(formData.route_id),
-          bus_id: parseInt(formData.bus_id),
-          departure_time: formData.departure_time,
-          arrival_time: formData.arrival_time,
-        });
-        Alert.alert('Success', 'Schedule created successfully');
+        Alert.alert('Error', 'Please select at least one day');
+      }
+      return;
+    }
+
+    console.log('Creating/updating schedule...');
+    try {
+      const scheduleData = {
+        route_id: parseInt(formData.route_id),
+        bus_id: parseInt(formData.bus_id),
+        departure_time: formData.departure_time,
+        days_of_week: formData.days_of_week,
+      };
+      console.log('Schedule data:', scheduleData);
+
+      if (editingSchedule) {
+        await scheduleService.updateSchedule(editingSchedule.id, scheduleData);
+        console.log('Schedule updated successfully');
+        if (Platform.OS === 'web') {
+          alert('Schedule updated successfully');
+        } else {
+          Alert.alert('Success', 'Schedule updated successfully');
+        }
+      } else {
+        await scheduleService.createSchedule(scheduleData);
+        console.log('Schedule created successfully');
+        if (Platform.OS === 'web') {
+          alert('Schedule created successfully');
+        } else {
+          Alert.alert('Success', 'Schedule created successfully');
+        }
       }
       setModalVisible(false);
-      setFormData({ route_id: '', bus_id: '', departure_time: '', arrival_time: '' });
+      setFormData({ route_id: '', bus_id: '', departure_time: '', days_of_week: [] });
       setEditingSchedule(null);
       loadSchedules();
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || `Failed to ${editingSchedule ? 'update' : 'create'} schedule`);
+      console.error('Schedule create/update error:', error);
+      console.error('Error response:', error.response);
+      const errorMsg = error.response?.data?.detail || error.message || `Failed to ${editingSchedule ? 'update' : 'create'} schedule`;
+      if (Platform.OS === 'web') {
+        alert(`Error: ${errorMsg}`);
+      } else {
+        Alert.alert('Error', errorMsg);
+      }
     }
   };
 
   const handleEdit = (schedule: any) => {
+    console.log('Editing schedule:', schedule);
     setEditingSchedule(schedule);
     setFormData({
-      route_id: schedule.route_id.toString(),
-      bus_id: schedule.bus_id.toString(),
-      departure_time: schedule.departure_time,
-      arrival_time: schedule.arrival_time,
+      route_id: schedule.route_id?.toString() || '',
+      bus_id: schedule.bus_id?.toString() || '',
+      departure_time: schedule.departure_time || '',
+      days_of_week: schedule.days_of_week || [],
     });
     setModalVisible(true);
   };
@@ -152,14 +193,15 @@ export default function ScheduleManagement() {
                 <MaterialCommunityIcons name="calendar-clock" size={32} color="#06b6d4" />
               </View>
               <View style={styles.cardInfo}>
-                <Text style={styles.scheduleTitle}>Route #{schedule.route_id} - Bus #{schedule.bus_id}</Text>
+                <Text style={styles.scheduleTitle}>{schedule.route_name || `Route #${schedule.route_id}`}</Text>
+                <Text style={styles.scheduleSubtitle}>{schedule.bus_number || `Bus #${schedule.bus_id}`}</Text>
                 <View style={styles.timeRow}>
-                  <MaterialCommunityIcons name="clock-start" size={16} color="#10b981" />
-                  <Text style={styles.timeText}>Depart: {schedule.departure_time}</Text>
+                  <MaterialCommunityIcons name="clock-outline" size={16} color="#06b6d4" />
+                  <Text style={styles.timeText}>Departs: {schedule.departure_time}</Text>
                 </View>
                 <View style={styles.timeRow}>
-                  <MaterialCommunityIcons name="clock-end" size={16} color="#ef4444" />
-                  <Text style={styles.timeText}>Arrive: {schedule.arrival_time}</Text>
+                  <MaterialCommunityIcons name="calendar-check" size={16} color="#10b981" />
+                  <Text style={styles.timeText}>{Array.isArray(schedule.days_of_week) ? schedule.days_of_week.join(', ') : schedule.days_of_week}</Text>
                 </View>
               </View>
               <View style={styles.cardActions}>
@@ -206,23 +248,44 @@ export default function ScheduleManagement() {
 
             <TextInput
               style={styles.input}
-              placeholder="Departure Time (HH:MM)"
+              placeholder="Departure Time (HH:MM:SS)"
               value={formData.departure_time}
               onChangeText={(text) => setFormData({ ...formData, departure_time: text })}
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Arrival Time (HH:MM)"
-              value={formData.arrival_time}
-              onChangeText={(text) => setFormData({ ...formData, arrival_time: text })}
-            />
+            <Text style={styles.label}>Days of Week:</Text>
+            <View style={styles.daysContainer}>
+              {daysOfWeek.map((day) => (
+                <TouchableOpacity
+                  key={day}
+                  style={[
+                    styles.dayButton,
+                    formData.days_of_week.includes(day) && styles.dayButtonSelected,
+                  ]}
+                  onPress={() => {
+                    const newDays = formData.days_of_week.includes(day)
+                      ? formData.days_of_week.filter((d) => d !== day)
+                      : [...formData.days_of_week, day];
+                    setFormData({ ...formData, days_of_week: newDays });
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.dayButtonText,
+                      formData.days_of_week.includes(day) && styles.dayButtonTextSelected,
+                    ]}
+                  >
+                    {day.substring(0, 3)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.cancelButton} onPress={() => {
                 setModalVisible(false);
                 setEditingSchedule(null);
-                setFormData({ route_id: '', bus_id: '', departure_time: '', arrival_time: '' });
+                setFormData({ route_id: '', bus_id: '', departure_time: '', days_of_week: [] });
               }}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
@@ -297,6 +360,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#1e293b',
+    marginBottom: 4,
+  },
+  scheduleSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
     marginBottom: 8,
   },
   timeRow: {
@@ -355,6 +423,38 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 12,
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  dayButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#fff',
+  },
+  dayButtonSelected: {
+    backgroundColor: '#06b6d4',
+    borderColor: '#06b6d4',
+  },
+  dayButtonText: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  dayButtonTextSelected: {
+    color: '#fff',
   },
   modalButtons: {
     flexDirection: 'row',

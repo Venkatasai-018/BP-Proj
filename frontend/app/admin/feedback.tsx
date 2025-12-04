@@ -25,9 +25,11 @@ export default function FeedbackDashboard() {
   });
 
   const loadFeedback = async () => {
+    console.log('Loading feedback...');
     setLoading(true);
     try {
       const data = await feedbackService.getFeedback();
+      console.log('Feedback data received:', data);
       setFeedbacks(data);
       
       // Calculate statistics
@@ -42,8 +44,12 @@ export default function FeedbackDashboard() {
       const poor = data.filter((f: any) => f.rating <= 2).length;
       
       setStats({ total, avgRating: parseFloat(avgRating), excellent, good, average, poor });
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load feedback');
+      console.log('Feedback stats:', { total, avgRating, excellent, good, average, poor });
+    } catch (error: any) {
+      console.error('Load feedback error:', error);
+      console.error('Error response:', error.response);
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to load feedback';
+      Alert.alert('Error', errorMsg);
     } finally {
       setLoading(false);
     }

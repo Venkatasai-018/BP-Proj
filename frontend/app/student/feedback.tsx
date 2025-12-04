@@ -61,29 +61,48 @@ export default function StudentFeedback() {
       return;
     }
 
+    console.log('Submitting feedback...');
     setLoading(true);
     try {
-      await feedbackService.submitFeedback({
+      const feedbackData = {
         user_id: userData.id,
         user_type: 'student',
         rating: rating,
         category: category,
         message: message.trim(),
-      });
+      };
+      console.log('Feedback data:', feedbackData);
+      await feedbackService.submitFeedback(feedbackData);
+      console.log('Feedback submitted successfully');
 
-      Alert.alert('Success', 'Thank you for your feedback!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            setRating(0);
-            setCategory('Service');
-            setMessage('');
-            router.back();
+      if (Platform.OS === 'web') {
+        alert('Thank you for your feedback!');
+        setRating(0);
+        setCategory('Service');
+        setMessage('');
+        router.back();
+      } else {
+        Alert.alert('Success', 'Thank you for your feedback!', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setRating(0);
+              setCategory('Service');
+              setMessage('');
+              router.back();
+            },
           },
-        },
-      ]);
+        ]);
+      }
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to submit feedback');
+      console.error('Submit feedback error:', error);
+      console.error('Error response:', error.response);
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to submit feedback';
+      if (Platform.OS === 'web') {
+        alert(`Error: ${errorMsg}`);
+      } else {
+        Alert.alert('Error', errorMsg);
+      }
     } finally {
       setLoading(false);
     }
